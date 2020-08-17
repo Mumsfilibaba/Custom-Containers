@@ -700,7 +700,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 1
+#if 0
 	{
 		std::cout << "Testing TArray<Vec3>" << std::endl;
 		std::cout << std::endl << "Testing Constructors" << std::endl;
@@ -961,7 +961,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 0
+#if 1
 	//Performance
 	BenchMark();
 #endif

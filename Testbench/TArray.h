@@ -1,8 +1,6 @@
 #pragma once
 #include "TypeUtilities.h"
 
-#include <iostream>
-
 /*
 * Dynamic Array similar to std::vector
 */
