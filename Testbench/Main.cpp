@@ -8,6 +8,32 @@
 
 #include "TArray.h"
 
+struct Vec3
+{
+	Vec3()
+		: X(0.0)
+		, Y(0.0)
+		, Z(0.0)
+	{
+	}
+
+	Vec3(double InX, double InY, double InZ)
+		: X(InX)
+		, Y(InY)
+		, Z(InZ)
+	{
+	}
+
+	double X;
+	double Y;
+	double Z;
+
+	operator std::string()
+	{
+		return std::to_string(X) + ", " + std::to_string(Y) + ", " + std::to_string(Z);
+	}
+};
+
 template<typename T>
 void PrintArr(const TArray<T>& Arr, const std::string& Name = "")
 {
@@ -16,7 +42,7 @@ void PrintArr(const TArray<T>& Arr, const std::string& Name = "")
 
 	for (auto i : Arr)
 	{
-		std::cout << i << std::endl;
+		std::cout << (std::string)i << std::endl;
 	}
 
 	std::cout << "Size: " << Arr.GetSize() << std::endl;
@@ -47,8 +73,8 @@ void PrintArr(const std::vector<T>& Arr, const std::string& Name = "")
 void BenchMark()
 {
 	// Performance
-	std::cout << std::endl << "Benchmark" << std::endl;
-	const Uint32 TestCount = 100;
+	std::cout << std::endl << "Benchmark (std::string)" << std::endl;
+	const Uint32 TestCount = 10;
 
 	// Insert
 #if 1
@@ -226,273 +252,719 @@ void BenchMark()
 		}
 	}
 #endif
+
+	std::cout << std::endl << "Benchmark (Vec3)" << std::endl;
+
+	// Insert
+#if 1
+	{
+		const Uint32 Iterations = 100000;
+		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				std::vector<Vec3> Vectors0;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors0.insert(Vectors0.begin(), Vec3(3.0, 5.0, -6.0));
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+
+			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+		}
+
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				TArray<Vec3> Vectors1;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors1.Insert(Vectors1.begin(), Vec3(3.0, 5.0, -6.0));
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+		}
+	}
+#endif
+
+#if 1
+	// Emplace
+	{
+		const Uint32 Iterations = 100000;
+		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				std::vector<Vec3> Vectors0;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors0.emplace(Vectors0.begin(), 3.0, 5.0, -6.0);
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+
+			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+		}
+
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				TArray<Vec3> Vectors1;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors1.Emplace(Vectors1.begin(), double(J + 1), 5.0, -6.0);
+				}
+
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+		}
+	}
+#endif
+
+#if 1
+	// PushBack
+	{
+		const Uint32 Iterations = 100000;
+		std::cout << std::endl << "PushBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				std::vector<Vec3> Vectors0;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors0.push_back(Vec3(3.0, 5.0, -6.0));
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+
+			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+		}
+
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				TArray<Vec3> Vectors1;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors1.PushBack(Vec3(3.0, 5.0, -6.0));
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+		}
+	}
+#endif
+
+#if 1
+	// EmplaceBack
+	{
+		const Uint32 Iterations = 100000;
+		std::cout << std::endl << "EmplaceBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				std::vector<Vec3> Vectors0;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors0.emplace_back(3.0, 5.0, -6.0);
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+
+			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+		}
+
+		{
+			Uint64 Total = 0;
+			for (Uint32 I = 0; I < TestCount; I++)
+			{
+				TArray<Vec3> Vectors1;
+				auto t1 = std::chrono::high_resolution_clock::now();
+				for (Uint32 J = 0; J < Iterations; J++)
+				{
+					Vectors1.EmplaceBack(3.0, 5.0, -6.0);
+				}
+				auto t2 = std::chrono::high_resolution_clock::now();
+
+				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+				Total += duration;
+			}
+			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+		}
+	}
+#endif
 }
 
 int main(int Argc, const char* Argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	std::string ArgvStr = Argv[0];
-
-	std::cout << "Testing TArray<std::string>" << std::endl;
-
-	std::cout << std::endl << "Testing Constructors" << std::endl;
-	// Test constructors
-	TArray<std::string> Strings0;
-	TArray<std::string> Strings1(5, "Hello");
-	TArray<std::string> Strings2(Strings1.Begin(), Strings1.End());
-	TArray<std::string> Strings3 =
+#if 0
 	{
-		"Hello World",
-		"TArray",
-		"This is a longer teststring"
-	};
+		std::string ArgvStr = Argv[0];
 
-	PrintArr(Strings0);
-	PrintArr(Strings1);
-	PrintArr(Strings2);
-	PrintArr(Strings3);
+		std::cout << "Testing TArray<std::string>" << std::endl;
 
-	{
-		// Test copy an empty array
-		TArray<std::string> Strings4 = Strings0;
-		// Test copy an array with data
-		TArray<std::string> Strings5 = Strings1;
+		std::cout << std::endl << "Testing Constructors" << std::endl;
+		// Test constructors
+		TArray<std::string> Strings0;
+		TArray<std::string> Strings1(5, "Hello");
+		TArray<std::string> Strings2(Strings1.Begin(), Strings1.End());
+		TArray<std::string> Strings3 =
+		{
+			"Hello World",
+			"TArray",
+			"This is a longer teststring"
+		};
 
+		PrintArr(Strings0);
+		PrintArr(Strings1);
+		PrintArr(Strings2);
+		PrintArr(Strings3);
+
+		{
+			// Test copy an empty array
+			TArray<std::string> Strings4 = Strings0;
+			// Test copy an array with data
+			TArray<std::string> Strings5 = Strings1;
+
+			PrintArr(Strings4);
+
+			std::cout << "Before move" << std::endl << std::endl;
+			PrintArr(Strings5);
+
+			// Test move an array with data
+			TArray<std::string> Strings6 = Move(Strings5);
+
+			std::cout << "After move" << std::endl << std::endl;
+			PrintArr(Strings5);
+			PrintArr(Strings6);
+		}
+
+		// Assign
+		std::cout << std::endl << "Testing Assign" << std::endl;
+		Strings0.Assign(7, "This is a teststring");
+		PrintArr(Strings0);
+
+		Strings1.Assign({ "Test-String #1", "Test-String #2", "Test-String #3" });
+		PrintArr(Strings1);
+
+		Strings2.Assign(Strings3.Begin(), Strings3.End());
+		PrintArr(Strings2);
+
+		// Resize
+		std::cout << std::endl << "Testing Resize" << std::endl;
+
+		// Constructing a empty Array to test resize
+		TArray<std::string> Strings4;
+
+		std::cout << "Before Resize" << std::endl;
+		PrintArr(Strings4);
+		PrintArr(Strings3);
+		PrintArr(Strings1);
+
+		Strings4.Resize(10, "New String");
+		Strings3.Resize(0);
+		Strings1.Resize(6, "Hello World");
+
+		std::cout << "After Resize" << std::endl;
+		PrintArr(Strings4);
+		PrintArr(Strings3);
+		PrintArr(Strings1);
+
+		std::cout << "Testing Shrinking Resize" << std::endl;
+		Strings4.Resize(2, "New String");
 		PrintArr(Strings4);
 
-		std::cout << "Before move" << std::endl;
-		PrintArr(Strings5);
+		Strings4.Resize(15, "New String");
+		PrintArr(Strings4);
 
-		// Test move an array with data
-		TArray<std::string> Strings6 = Move(Strings5);
+		// Reserve
+		std::cout << std::endl << "Testing Reserve" << std::endl;
 
-		std::cout << "After move" << std::endl;
-		PrintArr(Strings5);
-		PrintArr(Strings6);
+		std::cout << "Before Reserve" << std::endl;
+		PrintArr(Strings4);
+
+		std::cout << "After Reserve" << std::endl;
+		Strings4.Reserve(Strings4.GetCapacity());
+		PrintArr(Strings4);
+
+		std::cout << "Shrinking" << std::endl;
+		Strings4.Reserve(5);
+		PrintArr(Strings4);
+
+		std::cout << "Growing" << std::endl;
+		Strings4.Reserve(10);
+		PrintArr(Strings4);
+
+		std::cout << "Resize" << std::endl;
+		Strings4.Resize(Strings4.GetCapacity() - 2, "This spot is reserved");
+		PrintArr(Strings4);
+
+		// Shrink To Fit
+		std::cout << std::endl << "Testing ShrinkToFit" << std::endl;
+
+		std::cout << std::endl << "Before ShrinkToFit" << std::endl;
+		PrintArr(Strings4);
+
+		Strings4.ShrinkToFit();
+
+		std::cout << std::endl << "After ShrinkToFit" << std::endl;
+		PrintArr(Strings4);
+
+		// Assignment
+		std::cout << std::endl << "Testing Assignment" << std::endl;
+
+		Strings3.Resize(3, "No I am your father");
+
+		std::cout << "Before Assignment" << std::endl;
+		PrintArr(Strings0);
+		PrintArr(Strings1);
+		PrintArr(Strings2);
+		PrintArr(Strings3);
+		PrintArr(Strings4);
+
+		std::cout << "Strings0 = Strings4" << std::endl;
+		Strings0 = Strings4;
+
+		std::cout << "Strings1 = Move(Strings3)" << std::endl;
+		Strings1 = Move(Strings3);
+
+		std::cout << "Strings2 = InitializerList" << std::endl;
+		Strings2 =
+		{
+			"Another String in a InitializerList",
+			"Strings are kinda cool",
+			"Letters to fill up space in a string"
+		};
+
+		std::cout << "After Assignment" << std::endl;
+		PrintArr(Strings0);
+		PrintArr(Strings1);
+		PrintArr(Strings2);
+		PrintArr(Strings3);
+		PrintArr(Strings4);
+
+		// PushBack
+		std::cout << std::endl << "Testing PushBack" << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Strings2.PushBack("This is Pushed String #" + std::to_string(I));
+		}
+		PrintArr(Strings2);
+
+		std::cout << std::endl << "Testing PushBack" << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Strings2.PushBack(ArgvStr);
+		}
+		PrintArr(Strings2);
+
+		// EmplaceBack
+		std::cout << std::endl << "Testing EmplaceBack" << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Strings2.EmplaceBack("This is an Emplaced String #" + std::to_string(I));
+		}
+		PrintArr(Strings2);
+
+		// PopBack
+		std::cout << std::endl << "Testing PopBack" << std::endl;
+		for (Uint32 I = 0; I < 3; I++)
+		{
+			Strings2.PopBack();
+		}
+		PrintArr(Strings2);
+
+		// Insert
+		std::cout << std::endl << "Testing Insert" << std::endl;
+		std::cout << "At front" << std::endl;
+		Strings2.Insert(Strings2.Begin(), ArgvStr);
+		Strings2.Insert(Strings2.Begin(), "Inserted String");
+		Strings2.Insert(Strings2.Begin(), { "Inserted String #1", "Inserted String #2" });
+		PrintArr(Strings2);
+
+		std::cout << "At Arbitrary" << std::endl;
+		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
+		Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again");
+		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again #1", "Inserted String Again #2" });
+		PrintArr(Strings2);
+
+		std::cout << "At End" << std::endl;
+		Strings2.Insert(Strings2.End(), { "Inserted String At End #1", "Inserted String At End #2" });
+		PrintArr(Strings2);
+
+		std::cout << "At front after reallocation" << std::endl;
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin(), ArgvStr);
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin(), "Inserted String Reallocated");
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin(), { "Inserted String Reallocated #1", "Inserted String Reallocated #2" });
+		PrintArr(Strings2);
+
+		std::cout << "At Arbitrary after reallocation" << std::endl;
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again Reallocated");
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again Reallocated #1", "Inserted String Again Reallocated #2" });
+		PrintArr(Strings2);
+
+		std::cout << "At End after reallocation" << std::endl;
+		// Add a shrink to fit to force reallocation
+		Strings2.ShrinkToFit();
+		Strings2.Insert(Strings2.End(), { "Inserted String At End Reallocated #1", "Inserted String At End Reallocated #2" });
+		PrintArr(Strings2);
+
+		// Erase
+		std::cout << std::endl << "Testing Erase" << std::endl;
+		PrintArr(Strings2);
+
+		std::cout << "At front" << std::endl;
+		Strings2.Erase(Strings2.Begin());
+		PrintArr(Strings2);
+
+		std::cout << "At Arbitrary" << std::endl;
+		Strings2.Erase(Strings2.Begin() + 2);
+		PrintArr(Strings2);
+
+		std::cout << "Range At front" << std::endl;
+		Strings2.Erase(Strings2.Begin(), Strings2.Begin() + 2);
+		PrintArr(Strings2);
+
+		std::cout << "Range At Arbitrary" << std::endl;
+		Strings2.Erase(Strings2.Begin() + 4, Strings2.Begin() + 7);
+		PrintArr(Strings2);
+
+		std::cout << "Range At End" << std::endl;
+		Strings2.Erase(Strings2.End() - 3, Strings2.End());
+		PrintArr(Strings2);
+
+		// Swap
+		std::cout << std::endl << "Testing Swap" << std::endl;
+		std::cout << "Before" << std::endl;
+		PrintArr(Strings0);
+		PrintArr(Strings2);
+
+		Strings0.Swap(Strings2);
+
+		std::cout << "After" << std::endl;
+		PrintArr(Strings0);
+		PrintArr(Strings2);
 	}
+#endif
 
-	// Assign
-	std::cout << std::endl << "Testing Assign" << std::endl;
-	Strings0.Assign(7, "This is a teststring");
-	PrintArr(Strings0);
-
-	Strings1.Assign({ "Test-String #1", "Test-String #2", "Test-String #3" });
-	PrintArr(Strings1);
-
-	Strings2.Assign(Strings3.Begin(), Strings3.End());
-	PrintArr(Strings2);
-
-	// Resize
-	std::cout << std::endl << "Testing Resize" << std::endl;
-	
-	// Constructing a empty Array to test resize
-	TArray<std::string> Strings4;
-
-	std::cout << "Before Resize" << std::endl;
-	PrintArr(Strings4);
-	PrintArr(Strings3);
-	PrintArr(Strings1);
-
-	Strings4.Resize(10, "New String");
-	Strings3.Resize(0);
-	Strings1.Resize(6, "Hello World");
-
-	std::cout << "After Resize" << std::endl;
-	PrintArr(Strings4);
-	PrintArr(Strings3);
-	PrintArr(Strings1);
-
-	std::cout << "Testing Shrinking Resize" << std::endl;
-	Strings4.Resize(2, "New String");
-	PrintArr(Strings4);
-
-	Strings4.Resize(15, "New String");
-	PrintArr(Strings4);
-
-	// Reserve
-	std::cout << std::endl << "Testing Reserve" << std::endl;
-	
-	std::cout << "Before Reserve" << std::endl;
-	PrintArr(Strings4);
-
-	std::cout << "After Reserve" << std::endl;
-	Strings4.Reserve(Strings4.GetCapacity());
-	PrintArr(Strings4);
-	
-	std::cout << "Shrinking" << std::endl;
-	Strings4.Reserve(5);
-	PrintArr(Strings4);
-
-	std::cout << "Growing" << std::endl;
-	Strings4.Reserve(10);
-	PrintArr(Strings4);
-
-	std::cout << "Resize" << std::endl;
-	Strings4.Resize(Strings4.GetCapacity() - 2, "This spot is reserved");
-	PrintArr(Strings4);
-
-	// Shrink To Fit
-	std::cout << std::endl << "Testing ShrinkToFit" << std::endl;
-	
-	std::cout << std::endl << "Before ShrinkToFit" << std::endl;
-	PrintArr(Strings4);
-
-	Strings4.ShrinkToFit();
-
-	std::cout << std::endl << "After ShrinkToFit" << std::endl;
-	PrintArr(Strings4);
-
-	// Assignment
-	std::cout << std::endl << "Testing Assignment" << std::endl;
-	
-	Strings3.Resize(3, "No I am your father");
-
-	std::cout << "Before Assignment" << std::endl;
-	PrintArr(Strings0);
-	PrintArr(Strings1);
-	PrintArr(Strings2);
-	PrintArr(Strings3);
-	PrintArr(Strings4);
-	
-	std::cout << "Strings0 = Strings4" << std::endl;
-	Strings0 = Strings4;
-
-	std::cout << "Strings1 = Move(Strings3)" << std::endl;
-	Strings1 = Move(Strings3);
-	
-	std::cout << "Strings2 = InitializerList" << std::endl;
-	Strings2 =
+#if 1
 	{
-		"Another String in a InitializerList",
-		"Strings are kinda cool",
-		"Letters to fill up space in a string"
-	};
+		std::cout << "Testing TArray<Vec3>" << std::endl;
+		std::cout << std::endl << "Testing Constructors" << std::endl;
+		// Test constructors
+		TArray<Vec3> Vectors0;
+		TArray<Vec3> Vectors1(5, Vec3(1.0, 1.0, 1.0));
+		TArray<Vec3> Vectors2(Vectors1.Begin(), Vectors1.End());
+		TArray<Vec3> Vectors3 =
+		{
+			Vec3(1.0, 1.0, 1.0),
+			Vec3(2.0, 2.0, 2.0),
+			Vec3(3.0, 3.0, 3.0)
+		};
 
-	std::cout << "After Assignment" << std::endl;
-	PrintArr(Strings0);
-	PrintArr(Strings1);
-	PrintArr(Strings2);
-	PrintArr(Strings3);
-	PrintArr(Strings4);
+		PrintArr(Vectors0);
+		PrintArr(Vectors1);
+		PrintArr(Vectors2);
+		PrintArr(Vectors3);
 
-	// PushBack
-	std::cout << std::endl << "Testing PushBack" << std::endl;
-	for (Uint32 I = 0; I < 6; I++)
-	{
-		Strings2.PushBack("This is Pushed String #" + std::to_string(I));
+		{
+			// Test copy an empty array
+			TArray<Vec3> Vectors4 = Vectors0;
+			// Test copy an array with data
+			TArray<Vec3> Vectors5 = Vectors1;
+
+			PrintArr(Vectors4);
+
+			std::cout << "Before move" << std::endl << std::endl;
+			PrintArr(Vectors5);
+
+			// Test move an array with data
+			TArray<Vec3> Vectors6 = Move(Vectors5);
+
+			std::cout << "After move" << std::endl << std::endl;
+			PrintArr(Vectors5);
+			PrintArr(Vectors6);
+		}
+
+		// Assign
+		std::cout << std::endl << "Testing Assign" << std::endl;
+		Vectors0.Assign(7, Vec3(5.0, 5.0, 5.0));
+		PrintArr(Vectors0);
+
+		Vectors1.Assign({ Vec3(1.0, 5.0, 5.0), Vec3(2.0, 5.0, 5.0), Vec3(3.0, 5.0, 5.0) });
+		PrintArr(Vectors1);
+
+		Vectors2.Assign(Vectors3.Begin(), Vectors3.End());
+		PrintArr(Vectors2);
+
+		// Resize
+		std::cout << std::endl << "Testing Resize" << std::endl << std::endl;
+
+		// Constructing a empty Array to test resize
+		TArray<Vec3> Vectors4;
+
+		std::cout << "Before Resize" << std::endl << std::endl;
+		PrintArr(Vectors4);
+		PrintArr(Vectors3);
+		PrintArr(Vectors1);
+
+		Vectors4.Resize(10, Vec3(-10.0, -10.0, -10.0));
+		Vectors3.Resize(0);
+		Vectors1.Resize(6, Vec3(-5.0, 10.0, -15.0));
+
+		std::cout << "After Resize" << std::endl << std::endl;
+		PrintArr(Vectors4);
+		PrintArr(Vectors3);
+		PrintArr(Vectors1);
+
+		std::cout << "Testing Shrinking Resize" << std::endl << std::endl;
+		Vectors4.Resize(2, Vec3(-15.0, -15.0, -15.0));
+		PrintArr(Vectors4);
+
+		Vectors4.Resize(15, Vec3(23.0, 23.0, 23.0));
+		PrintArr(Vectors4);
+
+		// Reserve
+		std::cout << std::endl << "Testing Reserve" << std::endl << std::endl;
+
+		std::cout << "Before Reserve" << std::endl << std::endl;
+		PrintArr(Vectors4);
+
+		std::cout << "After Reserve" << std::endl << std::endl;
+		Vectors4.Reserve(Vectors4.GetCapacity());
+		PrintArr(Vectors4);
+
+		std::cout << "Shrinking" << std::endl << std::endl;
+		Vectors4.Reserve(5);
+		PrintArr(Vectors4);
+
+		std::cout << "Growing" << std::endl << std::endl;
+		Vectors4.Reserve(10);
+		PrintArr(Vectors4);
+
+		std::cout << "Resize" << std::endl << std::endl;
+		Vectors4.Resize(Vectors4.GetCapacity() - 2, Vec3(-1.0f, -1.0f, -1.0f));
+		PrintArr(Vectors4);
+
+		// Shrink To Fit
+		std::cout << std::endl << "Testing ShrinkToFit" << std::endl;
+
+		std::cout << std::endl << "Before ShrinkToFit" << std::endl << std::endl;
+		PrintArr(Vectors4);
+
+		Vectors4.ShrinkToFit();
+
+		std::cout << std::endl << "After ShrinkToFit" << std::endl << std::endl;
+		PrintArr(Vectors4);
+
+		// Assignment
+		std::cout << std::endl << "Testing Assignment" << std::endl << std::endl;
+
+		Vectors3.Resize(3, Vec3(42.0, 42.0, 42.0));
+
+		std::cout << "Before Assignment" << std::endl << std::endl;
+		PrintArr(Vectors0);
+		PrintArr(Vectors1);
+		PrintArr(Vectors2);
+		PrintArr(Vectors3);
+		PrintArr(Vectors4);
+
+		std::cout << "Vectors0 = Vectors4" << std::endl;
+		Vectors0 = Vectors4;
+
+		std::cout << "Vectors1 = Move(Vectors3)" << std::endl;
+		Vectors1 = Move(Vectors3);
+
+		std::cout << "Vectors2 = InitializerList" << std::endl << std::endl;
+		Vectors2 =
+		{
+			Vec3(9.0, 9.0, 9.0),
+			Vec3(10.0, 10.0, 10.0),
+			Vec3(11.0, 11.0, 11.0)
+		};
+
+		std::cout << "After Assignment" << std::endl << std::endl;
+		PrintArr(Vectors0);
+		PrintArr(Vectors1);
+		PrintArr(Vectors2);
+		PrintArr(Vectors3);
+		PrintArr(Vectors4);
+
+		// PushBack
+		std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Vectors2.PushBack(Vec3(7.0, 7.0, 7.0));
+		}
+		PrintArr(Vectors2);
+
+		Vec3 Vector(5.0f, -45.0f, 5.0f);
+		std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Vectors2.PushBack(Vector);
+		}
+		PrintArr(Vectors2);
+
+		// EmplaceBack
+		std::cout << std::endl << "Testing EmplaceBack" << std::endl << std::endl;
+		for (Uint32 I = 0; I < 6; I++)
+		{
+			Vectors2.EmplaceBack(1.0, 0.0, 1.0);
+		}
+		PrintArr(Vectors2);
+
+		// PopBack
+		std::cout << std::endl << "Testing PopBack" << std::endl << std::endl;
+		for (Uint32 I = 0; I < 3; I++)
+		{
+			Vectors2.PopBack();
+		}
+		PrintArr(Vectors2);
+
+		// Insert
+		std::cout << std::endl << "Testing Insert" << std::endl << std::endl;
+		std::cout << "At front" << std::endl << std::endl;
+		Vectors2.Insert(Vectors2.Begin(), Vector);
+		Vectors2.Insert(Vectors2.Begin(), Vec3(-1.0, -1.0, -1.0));
+		Vectors2.Insert(Vectors2.Begin(), { Vec3(1.0f, 1.0f, 1.0f), Vec3(2.0f, 2.0f, 2.0f) });
+		PrintArr(Vectors2);
+
+		std::cout << "At Arbitrary" << std::endl << std::endl;
+		Vectors2.Insert(Vectors2.Begin() + 2, Vector);
+		Vectors2.Insert(Vectors2.Begin() + 2, Vec3(-1.0, -1.0, -2.0));
+		Vectors2.Insert(Vectors2.Begin() + 2, { Vec3(1.0f, 1.0f, 2.0f), Vec3(2.0f, 2.0f, 3.0f) });
+		PrintArr(Vectors2);
+
+		std::cout << "At End" << std::endl << std::endl;
+		Vectors2.Insert(Vectors2.End(), { Vec3(1.0f, 1.0f, 3.0f), Vec3(2.0f, 2.0f, 4.0f) });
+		PrintArr(Vectors2);
+
+		std::cout << "At front after reallocation" << std::endl << std::endl;
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin(), Vector);
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin(), Vec3(-1.0, -1.0, -3.0));
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin(), { Vec3(1.0f, 1.0f, 4.0f), Vec3(2.0f, 2.0f, 5.0f) });
+		PrintArr(Vectors2);
+
+		std::cout << "At Arbitrary after reallocation" << std::endl << std::endl;
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin() + 2, Vector);
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin() + 2, Vec3(-1.0, -1.0, -4.0));
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.Begin() + 2, { Vec3(1.0f, 1.0f, 5.0f), Vec3(2.0f, 2.0f, 6.0f) });
+		PrintArr(Vectors2);
+
+		std::cout << "At End after reallocation" << std::endl << std::endl;
+		// Add a shrink to fit to force reallocation
+		Vectors2.ShrinkToFit();
+		Vectors2.Insert(Vectors2.End(), { Vec3(6.0f, 6.0f, 6.0f), Vec3(2.0f, 2.0f, 7.0f) });
+		PrintArr(Vectors2);
+
+		// Erase
+		std::cout << std::endl << "Testing Erase" << std::endl << std::endl;
+		PrintArr(Vectors2);
+
+		std::cout << "At front" << std::endl << std::endl;
+		Vectors2.Erase(Vectors2.Begin());
+		PrintArr(Vectors2);
+
+		std::cout << "At Arbitrary" << std::endl << std::endl;
+		Vectors2.Erase(Vectors2.Begin() + 2);
+		PrintArr(Vectors2);
+
+		std::cout << "Range At front" << std::endl << std::endl;
+		Vectors2.Erase(Vectors2.Begin(), Vectors2.Begin() + 2);
+		PrintArr(Vectors2);
+
+		std::cout << "Range At Arbitrary" << std::endl << std::endl;
+		Vectors2.Erase(Vectors2.Begin() + 4, Vectors2.Begin() + 7);
+		PrintArr(Vectors2);
+
+		std::cout << "Range At End" << std::endl << std::endl;
+		Vectors2.Erase(Vectors2.End() - 3, Vectors2.End());
+		PrintArr(Vectors2);
+
+		// Swap
+		std::cout << std::endl << "Testing Swap" << std::endl << std::endl;
+		std::cout << "Before" << std::endl << std::endl;
+		PrintArr(Vectors0);
+		PrintArr(Vectors2);
+
+		Vectors0.Swap(Vectors2);
+
+		std::cout << "After" << std::endl << std::endl;
+		PrintArr(Vectors0);
+		PrintArr(Vectors2);
 	}
-	PrintArr(Strings2);
+#endif
 
-	std::cout << std::endl << "Testing PushBack" << std::endl;
-	for (Uint32 I = 0; I < 6; I++)
-	{
-		Strings2.PushBack(ArgvStr);
-	}
-	PrintArr(Strings2);
-
-	// EmplaceBack
-	std::cout << std::endl << "Testing EmplaceBack" << std::endl;
-	for (Uint32 I = 0; I < 6; I++)
-	{
-		Strings2.EmplaceBack("This is an Emplaced String #" + std::to_string(I));
-	}
-	PrintArr(Strings2);
-
-	// PopBack
-	std::cout << std::endl << "Testing PopBack" << std::endl;
-	for (Uint32 I = 0; I < 3; I++)
-	{
-		Strings2.PopBack();
-	}
-	PrintArr(Strings2);
-
-	// Insert
-	std::cout << std::endl << "Testing Insert" << std::endl;
-	std::cout << "At front" << std::endl;
-	Strings2.Insert(Strings2.Begin(), ArgvStr);
-	Strings2.Insert(Strings2.Begin(), "Inserted String");
-	Strings2.Insert(Strings2.Begin(), { "Inserted String #1", "Inserted String #2" });
-	PrintArr(Strings2);
-
-	std::cout << "At Arbitrary" << std::endl;
-	Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
-	Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again");
-	Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again #1", "Inserted String Again #2" });
-	PrintArr(Strings2);
-
-	std::cout << "At End" << std::endl;
-	Strings2.Insert(Strings2.End(), { "Inserted String At End #1", "Inserted String At End #2" });
-	PrintArr(Strings2);
-
-	std::cout << "At front after reallocation" << std::endl;
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin(), ArgvStr);
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin(), "Inserted String Reallocated");
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin(), { "Inserted String Reallocated #1", "Inserted String Reallocated #2" });
-	PrintArr(Strings2);
-
-	std::cout << "At Arbitrary after reallocation" << std::endl;
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again Reallocated");
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again Reallocated #1", "Inserted String Again Reallocated #2" });
-	PrintArr(Strings2);
-
-	std::cout << "At End after reallocation" << std::endl;
-	// Add a shrink to fit to force reallocation
-	Strings2.ShrinkToFit();
-	Strings2.Insert(Strings2.End(), { "Inserted String At End Reallocated #1", "Inserted String At End Reallocated #2" });
-	PrintArr(Strings2);
-
-	// Erase
-	std::cout << std::endl << "Testing Erase" << std::endl;
-	PrintArr(Strings2);
-	
-	std::cout << "At front" << std::endl;
-	Strings2.Erase(Strings2.Begin());
-	PrintArr(Strings2);
-
-	std::cout << "At Arbitrary" << std::endl;
-	Strings2.Erase(Strings2.Begin() + 2);
-	PrintArr(Strings2);
-
-	std::cout << "Range At front" << std::endl;
-	Strings2.Erase(Strings2.Begin(), Strings2.Begin() + 2);
-	PrintArr(Strings2);
-
-	std::cout << "Range At Arbitrary" << std::endl;
-	Strings2.Erase(Strings2.Begin() + 4, Strings2.Begin() + 7);
-	PrintArr(Strings2);
-
-	std::cout << "Range At End" << std::endl;
-	Strings2.Erase(Strings2.End() - 3, Strings2.End());
-	PrintArr(Strings2);
-
-	// Swap
-	std::cout << std::endl << "Testing Swap" << std::endl;
-	std::cout << "Before" << std::endl;
-	PrintArr(Strings0);
-	PrintArr(Strings2);
-
-	Strings0.Swap(Strings2);
-
-	std::cout << "After" << std::endl;
-	PrintArr(Strings0);
-	PrintArr(Strings2);
-
+#if 0
 	//Performance
 	BenchMark();
+#endif
 
 	return 0;
 }
