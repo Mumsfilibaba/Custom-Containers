@@ -5,8 +5,11 @@
 #include <chrono>
 #include <string>
 #include <crtdbg.h>
+#include <memory>
 
 #include "TArray.h"
+#include "TSharedPtr.h"
+#include "TUniquePtr.h"
 
 struct Vec3
 {
@@ -437,6 +440,7 @@ int main(int Argc, const char* Argv[])
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
+	// TArray
 #if 0
 	{
 		std::string ArgvStr = Argv[0];
@@ -961,7 +965,54 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 1
+	// TSharedPtr
+	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
+
+	struct Base
+	{
+		Uint32 X;
+	};
+
+	struct Derived : public Base
+	{
+		Uint32 Y;
+	};
+
+	Uint32* Ptr0 = new Uint32(9);
+	Uint32* Ptr1 = new Uint32(10);
+
+	// Test nullptr
+	TSharedPtr<Uint32> Null;
+	Null = Ptr0; // Takes ownership of Ptr0
+
+	TSharedPtr<Uint32> UintPtr0 = MakeShared<Uint32>(5);
+	TSharedPtr<Uint32> UintPtr1 = Null;
+	TSharedPtr<Uint32> UintPtr2 = TSharedPtr<Uint32>(Ptr1); // Takes ownership of Ptr1
+
+	TSharedPtr<Derived> DerivedPtr0 = MakeShared<Derived>();
+	TSharedPtr<Base> BasePtr0 = DerivedPtr0;
+
+	TWeakPtr<Base> WeakBase0 = BasePtr0;
+	TWeakPtr<Derived> WeakBase1 = DerivedPtr0;
+
+	TSharedPtr<Uint32> UintArr0 = TSharedPtr<Uint32>(new Uint32[5]);
+	TWeakPtr<Uint32> WeakArr = UintArr0;
+	TSharedPtr<Uint32> UintArr1 = WeakArr.MakeShared();
+
+	TUniquePtr<Uint32> UniqueInt = MakeUnique<Uint32>(5);
+	TSharedPtr<Uint32> UintPtr3 = TSharedPtr<Uint32>(Move(UniqueInt));
+
+	std::cout << "Testing Index operator" << std::endl;
+	WeakArr[0] = 5;
+	WeakArr[1] = 6;
+	std::cout << WeakArr[0] << std::endl;
+	std::cout << WeakArr[1] << std::endl;
+
+	std::cout << "Testing bool operators" << std::endl;
+	std::cout << std::boolalpha << (WeakBase0 == WeakBase1) << std::endl;
+	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
+
+#if 0
 	//Performance
 	BenchMark();
 #endif

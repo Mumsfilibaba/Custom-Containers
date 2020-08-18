@@ -207,7 +207,7 @@ public:
 	{
 	}
 
-	FORCEINLINE TArray(SizeType InSize, const ValueType& Value = ValueType()) noexcept
+	FORCEINLINE explicit TArray(SizeType InSize, const ValueType& Value = ValueType()) noexcept
 		: Data(nullptr)
 		, Size(0)
 		, Capacity(0)
@@ -218,7 +218,7 @@ public:
 		InternalMemset(Begin(), End(), Value);
 	}
 
-	FORCEINLINE TArray(Iterator InBegin, Iterator InEnd) noexcept
+	FORCEINLINE explicit TArray(Iterator InBegin, Iterator InEnd) noexcept
 		: Data(nullptr)
 		, Size(0)
 		, Capacity(0)
@@ -228,7 +228,7 @@ public:
 		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
 		Iterator NewRange = InternalAllocateElements(Count);
 		InternalCopyEmplace(InBegin, InEnd, NewRange);
-		
+
 		Data = NewRange.Ptr;
 		Size = Count;
 		Capacity = Count;
@@ -253,8 +253,8 @@ public:
 		, Size(0)
 		, Capacity(0)
 	{
-		ConstIterator ItBegin	= Other.Begin();
-		ConstIterator ItEnd		= Other.End();
+		ConstIterator ItBegin = Other.Begin();
+		ConstIterator ItEnd = Other.End();
 
 		const SizeType Count = static_cast<SizeType>(ItEnd.Ptr - ItBegin.Ptr);
 		Iterator NewRange = InternalAllocateElements(Count);
@@ -398,7 +398,7 @@ public:
 		Capacity = InCapacity;
 	}
 
-	FORCEINLINE Iterator PushBack(const ValueType& Element) noexcept
+	FORCEINLINE ValueType& PushBack(const ValueType& Element) noexcept
 	{
 		Iterator ItEnd = End();
 		if (Size >= Capacity)
@@ -423,10 +423,10 @@ public:
 
 		new(ItEnd.Ptr) ValueType(Element);
 		Size++;
-		return ItEnd;
+		return (*ItEnd);
 	}
 
-	FORCEINLINE Iterator PushBack(ValueType&& Element) noexcept
+	FORCEINLINE ValueType& PushBack(ValueType&& Element) noexcept
 	{
 		Iterator ItEnd = End();
 		if (Size >= Capacity)
@@ -451,11 +451,11 @@ public:
 
 		new(ItEnd.Ptr) ValueType(Move(Element));
 		Size++;
-		return ItEnd;
+		return (*ItEnd);
 	}
 
 	template<typename... TArgs>
-	FORCEINLINE Iterator EmplaceBack(TArgs&&... Args) noexcept
+	FORCEINLINE ValueType& EmplaceBack(TArgs&&... Args) noexcept
 	{
 		Iterator ItEnd = End();
 		if (Size >= Capacity)
@@ -480,7 +480,7 @@ public:
 
 		new(ItEnd.Ptr) ValueType(Forward<TArgs>(Args)...);
 		Size++;
-		return ItEnd;
+		return (*ItEnd);
 	}
 
 	template<typename... TArgs>
@@ -488,7 +488,8 @@ public:
 	{
 		if (Pos == End())
 		{
-			return EmplaceBack(Forward<TArgs>(Args)...);
+			EmplaceBack(Forward<TArgs>(Args)...);
+			return (End() - 1);
 		}
 
 		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
@@ -525,7 +526,8 @@ public:
 	{
 		if (Pos == End())
 		{
-			return PushBack(Value);
+			PushBack(Value);
+			return (End() - 1);
 		}
 
 		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
@@ -562,7 +564,8 @@ public:
 	{
 		if (Pos == End())
 		{
-			return PushBack(Value);
+			PushBack(Value);
+			return (End() - 1);
 		}
 
 		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
@@ -655,7 +658,6 @@ public:
 		InternalDestruct(Pos);
 
 		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
-
 		Iterator ItBegin = Begin() + Index;
 		InternalMemmoveBackwards(ItBegin + 1, End(), ItBegin);
 
@@ -693,7 +695,7 @@ public:
 	{
 		if (this != std::addressof(Other))
 		{
-			ValueType*	TempPtr = Data;
+			ValueType* TempPtr = Data;
 			SizeType	TempSize = Size;
 			SizeType	TempCapacity = Capacity;
 
@@ -906,7 +908,7 @@ private:
 
 	FORCEINLINE SizeType InternalGetResizeFactor() const
 	{
-		return Size + (Capacity) + 1;
+		return Size + (Capacity)+1;
 	}
 
 	FORCEINLINE Iterator InternalAllocateElements(SizeType InCapacity)
@@ -948,8 +950,8 @@ private:
 		// This function assumes that there is no overlap
 		if constexpr (std::is_trivially_move_constructible<ValueType>())
 		{
-			const SizeType Count	= static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize	= Count * sizeof(ValueType);
+			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
+			const SizeType CpySize = Count * sizeof(ValueType);
 			memcpy(Dest.Ptr, InBegin.Ptr, CpySize);
 		}
 		else
@@ -979,15 +981,42 @@ private:
 		if constexpr (std::is_trivially_copyable<ValueType>() && (sizeof(ValueType) == sizeof(Char)))
 		{
 			// We can use normal memset if this object is trivially copyable and has the size of maximumum of a char (basically only chars)
-			const SizeType Count	= static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize	= Count * sizeof(ValueType);
+			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
+			const SizeType CpySize = Count * sizeof(ValueType);
 			memset(InBegin.Ptr, Value, CpySize);
 		}
-		else
+		else if constexpr (std::is_nothrow_copy_assignable<ValueType>())
 		{
-			for (; InBegin != InEnd; InBegin++)
+			while (InBegin != InEnd)
 			{
 				(*InBegin) = Value;
+				InBegin++;
+			}
+		}
+		else if constexpr (std::is_nothrow_copy_constructible<ValueType>())
+		{
+			while (InBegin != InEnd)
+			{
+				InternalDestruct(InBegin);
+				new(InBegin.Ptr) ValueType(Value);
+				InBegin++;
+			}
+		}
+		else if constexpr (std::is_nothrow_move_assignable<ValueType>())
+		{
+			while (InBegin != InEnd)
+			{
+				(*InBegin) = Move(const_cast<ValueType&>(Value));
+				InBegin++;
+			}
+		}
+		else if constexpr (std::is_nothrow_move_constructible<ValueType>())
+		{
+			while (InBegin != InEnd)
+			{
+				InternalDestruct(InBegin);
+				new(InBegin.Ptr) ValueType(Move(const_cast<ValueType&>(Value)));
+				InBegin++;
 			}
 		}
 	}
@@ -999,8 +1028,8 @@ private:
 
 		if constexpr (std::is_trivially_copyable<ValueType>())
 		{
-			const SizeType Count	= static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize	= Count * sizeof(ValueType);
+			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
+			const SizeType CpySize = Count * sizeof(ValueType);
 			memcpy(Dest.Ptr, InBegin.Ptr, CpySize);
 		}
 		else
@@ -1016,8 +1045,13 @@ private:
 
 	FORCEINLINE void InternalMemmoveBackwards(Iterator InBegin, Iterator InEnd, Iterator Dest)
 	{
+		VALIDATE(InBegin <= InEnd);
+		if (InBegin == InEnd)
+		{
+			return;
+		}
+
 		VALIDATE(InEnd <= InternalRealEnd());
-		VALIDATE(InBegin < InEnd);
 		VALIDATE(InternalIsIteratorOwner(Dest));
 
 		// Move each object in the range to the destination
@@ -1026,7 +1060,7 @@ private:
 		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
 		if constexpr (std::is_trivially_move_assignable<ValueType>())
 		{
-			const SizeType CpySize	= Count * sizeof(ValueType);
+			const SizeType CpySize = Count * sizeof(ValueType);
 			memmove(Dest.Ptr, InBegin.Ptr, CpySize);
 		}
 		else
@@ -1048,8 +1082,8 @@ private:
 		{
 			if (Count > 0)
 			{
-				const SizeType CpySize		= Count * sizeof(ValueType);
-				const SizeType OffsetSize	= (Count - 1) * sizeof(ValueType);
+				const SizeType CpySize = Count * sizeof(ValueType);
+				const SizeType OffsetSize = (Count - 1) * sizeof(ValueType);
 				memmove(reinterpret_cast<Char*>(Dest.Ptr) - OffsetSize, InBegin.Ptr, CpySize);
 			}
 		}

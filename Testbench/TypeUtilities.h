@@ -1,4 +1,6 @@
 #pragma once
+#include <cassert>
+
 #define VALIDATE(Condition)	assert((Condition))
 #define FORCEINLINE			__forceinline
 
