@@ -77,7 +77,7 @@ void BenchMark()
 {
 	// Performance
 	std::cout << std::endl << "Benchmark (std::string)" << std::endl;
-	const Uint32 TestCount = 10;
+	const Uint32 TestCount = 100;
 
 	// Insert
 #if 1
@@ -171,7 +171,7 @@ void BenchMark()
 #if 1
 	// PushBack
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "PushBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -215,7 +215,7 @@ void BenchMark()
 #if 1
 	// EmplaceBack
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "EmplaceBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -261,7 +261,7 @@ void BenchMark()
 	// Insert
 #if 1
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 1000;
 		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -305,7 +305,7 @@ void BenchMark()
 #if 1
 	// Emplace
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 1000;
 		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -350,7 +350,7 @@ void BenchMark()
 #if 1
 	// PushBack
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "PushBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -394,7 +394,7 @@ void BenchMark()
 #if 1
 	// EmplaceBack
 	{
-		const Uint32 Iterations = 100000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "EmplaceBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -441,13 +441,13 @@ int main(int Argc, const char* Argv[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	// TArray
-#if 0
+#if 1
 	{
 		std::string ArgvStr = Argv[0];
 
 		std::cout << "Testing TArray<std::string>" << std::endl;
 
-		std::cout << std::endl << "Testing Constructors" << std::endl;
+		std::cout << std::endl << "Testing Constructors" << std::endl << std::endl;
 		// Test constructors
 		TArray<std::string> Strings0;
 		TArray<std::string> Strings1(5, "Hello");
@@ -484,7 +484,7 @@ int main(int Argc, const char* Argv[])
 		}
 
 		// Assign
-		std::cout << std::endl << "Testing Assign" << std::endl;
+		std::cout << std::endl << "Testing Assign" << std::endl << std::endl;
 		Strings0.Assign(7, "This is a teststring");
 		PrintArr(Strings0);
 
@@ -495,12 +495,12 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings2);
 
 		// Resize
-		std::cout << std::endl << "Testing Resize" << std::endl;
+		std::cout << std::endl << "Testing Resize" << std::endl << std::endl;
 
 		// Constructing a empty Array to test resize
 		TArray<std::string> Strings4;
 
-		std::cout << "Before Resize" << std::endl;
+		std::cout << "Before Resize" << std::endl << std::endl;
 		PrintArr(Strings4);
 		PrintArr(Strings3);
 		PrintArr(Strings1);
@@ -509,12 +509,12 @@ int main(int Argc, const char* Argv[])
 		Strings3.Resize(0);
 		Strings1.Resize(6, "Hello World");
 
-		std::cout << "After Resize" << std::endl;
+		std::cout << "After Resize" << std::endl << std::endl;
 		PrintArr(Strings4);
 		PrintArr(Strings3);
 		PrintArr(Strings1);
 
-		std::cout << "Testing Shrinking Resize" << std::endl;
+		std::cout << "Testing Shrinking Resize" << std::endl << std::endl;
 		Strings4.Resize(2, "New String");
 		PrintArr(Strings4);
 
@@ -522,44 +522,44 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings4);
 
 		// Reserve
-		std::cout << std::endl << "Testing Reserve" << std::endl;
+		std::cout << std::endl << "Testing Reserve" << std::endl << std::endl;
 
-		std::cout << "Before Reserve" << std::endl;
+		std::cout << "Before Reserve" << std::endl << std::endl;
 		PrintArr(Strings4);
 
-		std::cout << "After Reserve" << std::endl;
+		std::cout << "After Reserve" << std::endl << std::endl;
 		Strings4.Reserve(Strings4.GetCapacity());
 		PrintArr(Strings4);
 
-		std::cout << "Shrinking" << std::endl;
+		std::cout << "Shrinking" << std::endl << std::endl;
 		Strings4.Reserve(5);
 		PrintArr(Strings4);
-
-		std::cout << "Growing" << std::endl;
+		
+		std::cout << "Growing" << std::endl << std::endl;
 		Strings4.Reserve(10);
 		PrintArr(Strings4);
 
-		std::cout << "Resize" << std::endl;
+		std::cout << "Resize" << std::endl << std::endl;
 		Strings4.Resize(Strings4.GetCapacity() - 2, "This spot is reserved");
 		PrintArr(Strings4);
 
 		// Shrink To Fit
-		std::cout << std::endl << "Testing ShrinkToFit" << std::endl;
+		std::cout << std::endl << "Testing ShrinkToFit" << std::endl << std::endl;
 
-		std::cout << std::endl << "Before ShrinkToFit" << std::endl;
+		std::cout << std::endl << "Before ShrinkToFit" << std::endl << std::endl;
 		PrintArr(Strings4);
 
 		Strings4.ShrinkToFit();
 
-		std::cout << std::endl << "After ShrinkToFit" << std::endl;
+		std::cout << std::endl << "After ShrinkToFit" << std::endl << std::endl;
 		PrintArr(Strings4);
 
 		// Assignment
-		std::cout << std::endl << "Testing Assignment" << std::endl;
+		std::cout << std::endl << "Testing Assignment" << std::endl << std::endl;
 
 		Strings3.Resize(3, "No I am your father");
 
-		std::cout << "Before Assignment" << std::endl;
+		std::cout << "Before Assignment" << std::endl << std::endl;
 		PrintArr(Strings0);
 		PrintArr(Strings1);
 		PrintArr(Strings2);
@@ -572,7 +572,7 @@ int main(int Argc, const char* Argv[])
 		std::cout << "Strings1 = Move(Strings3)" << std::endl;
 		Strings1 = Move(Strings3);
 
-		std::cout << "Strings2 = InitializerList" << std::endl;
+		std::cout << "Strings2 = InitializerList" << std::endl << std::endl;
 		Strings2 =
 		{
 			"Another String in a InitializerList",
@@ -580,7 +580,7 @@ int main(int Argc, const char* Argv[])
 			"Letters to fill up space in a string"
 		};
 
-		std::cout << "After Assignment" << std::endl;
+		std::cout << "After Assignment" << std::endl << std::endl;
 		PrintArr(Strings0);
 		PrintArr(Strings1);
 		PrintArr(Strings2);
@@ -588,14 +588,14 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings4);
 
 		// PushBack
-		std::cout << std::endl << "Testing PushBack" << std::endl;
+		std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
 		for (Uint32 I = 0; I < 6; I++)
 		{
 			Strings2.PushBack("This is Pushed String #" + std::to_string(I));
 		}
 		PrintArr(Strings2);
 
-		std::cout << std::endl << "Testing PushBack" << std::endl;
+		std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
 		for (Uint32 I = 0; I < 6; I++)
 		{
 			Strings2.PushBack(ArgvStr);
@@ -603,7 +603,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings2);
 
 		// EmplaceBack
-		std::cout << std::endl << "Testing EmplaceBack" << std::endl;
+		std::cout << std::endl << "Testing EmplaceBack" << std::endl << std::endl;
 		for (Uint32 I = 0; I < 6; I++)
 		{
 			Strings2.EmplaceBack("This is an Emplaced String #" + std::to_string(I));
@@ -611,7 +611,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings2);
 
 		// PopBack
-		std::cout << std::endl << "Testing PopBack" << std::endl;
+		std::cout << std::endl << "Testing PopBack" << std::endl << std::endl;
 		for (Uint32 I = 0; I < 3; I++)
 		{
 			Strings2.PopBack();
@@ -619,24 +619,24 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings2);
 
 		// Insert
-		std::cout << std::endl << "Testing Insert" << std::endl;
-		std::cout << "At front" << std::endl;
+		std::cout << std::endl << "Testing Insert" << std::endl << std::endl;
+		std::cout << "At front" << std::endl << std::endl;
 		Strings2.Insert(Strings2.Begin(), ArgvStr);
 		Strings2.Insert(Strings2.Begin(), "Inserted String");
 		Strings2.Insert(Strings2.Begin(), { "Inserted String #1", "Inserted String #2" });
 		PrintArr(Strings2);
 
-		std::cout << "At Arbitrary" << std::endl;
+		std::cout << "At Arbitrary" << std::endl << std::endl;
 		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
 		Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again");
 		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again #1", "Inserted String Again #2" });
 		PrintArr(Strings2);
 
-		std::cout << "At End" << std::endl;
+		std::cout << "At End" << std::endl << std::endl;
 		Strings2.Insert(Strings2.End(), { "Inserted String At End #1", "Inserted String At End #2" });
 		PrintArr(Strings2);
 
-		std::cout << "At front after reallocation" << std::endl;
+		std::cout << "At front after reallocation" << std::endl << std::endl;
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin(), ArgvStr);
@@ -648,7 +648,7 @@ int main(int Argc, const char* Argv[])
 		Strings2.Insert(Strings2.Begin(), { "Inserted String Reallocated #1", "Inserted String Reallocated #2" });
 		PrintArr(Strings2);
 
-		std::cout << "At Arbitrary after reallocation" << std::endl;
+		std::cout << "At Arbitrary after reallocation" << std::endl << std::endl;
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
@@ -660,47 +660,62 @@ int main(int Argc, const char* Argv[])
 		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again Reallocated #1", "Inserted String Again Reallocated #2" });
 		PrintArr(Strings2);
 
-		std::cout << "At End after reallocation" << std::endl;
+		std::cout << "At End after reallocation" << std::endl << std::endl;
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.End(), { "Inserted String At End Reallocated #1", "Inserted String At End Reallocated #2" });
 		PrintArr(Strings2);
 
 		// Erase
-		std::cout << std::endl << "Testing Erase" << std::endl;
+		std::cout << std::endl << "Testing Erase" << std::endl << std::endl;
 		PrintArr(Strings2);
 
-		std::cout << "At front" << std::endl;
+		std::cout << "At front" << std::endl << std::endl;
 		Strings2.Erase(Strings2.Begin());
 		PrintArr(Strings2);
 
-		std::cout << "At Arbitrary" << std::endl;
+		std::cout << "At Arbitrary" << std::endl << std::endl;
 		Strings2.Erase(Strings2.Begin() + 2);
 		PrintArr(Strings2);
 
-		std::cout << "Range At front" << std::endl;
+		std::cout << "Range At front" << std::endl << std::endl;
 		Strings2.Erase(Strings2.Begin(), Strings2.Begin() + 2);
 		PrintArr(Strings2);
 
-		std::cout << "Range At Arbitrary" << std::endl;
+		std::cout << "Range At Arbitrary" << std::endl << std::endl;
 		Strings2.Erase(Strings2.Begin() + 4, Strings2.Begin() + 7);
 		PrintArr(Strings2);
 
-		std::cout << "Range At End" << std::endl;
+		std::cout << "Range At End" << std::endl << std::endl;
 		Strings2.Erase(Strings2.End() - 3, Strings2.End());
 		PrintArr(Strings2);
 
 		// Swap
-		std::cout << std::endl << "Testing Swap" << std::endl;
-		std::cout << "Before" << std::endl;
+		std::cout << std::endl << "Testing Swap" << std::endl << std::endl;
+		std::cout << "Before" << std::endl << std::endl;
 		PrintArr(Strings0);
 		PrintArr(Strings2);
 
 		Strings0.Swap(Strings2);
 
-		std::cout << "After" << std::endl;
+		std::cout << "After" << std::endl << std::endl;
 		PrintArr(Strings0);
 		PrintArr(Strings2);
+
+		// Iterators
+		std::cout << std::endl << "Testing Iterators" << std::endl;
+		
+		std::cout << std::endl << "Iterators" << std::endl << std::endl;
+		for (auto It = Strings2.Begin(); It != Strings2.End(); It++)
+		{
+			std::cout << (*It) << std::endl;
+		}
+
+		std::cout << std::endl << "Reverse Iterators" << std::endl << std::endl;
+		for (auto It = Strings2.ReverseBegin(); It != Strings2.ReverseEnd(); It++)
+		{
+			std::cout << (*It) << std::endl;
+		}
 	}
 #endif
 
@@ -965,6 +980,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
+#if 0
 	// TSharedPtr
 	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
 
@@ -1011,11 +1027,15 @@ int main(int Argc, const char* Argv[])
 	std::cout << "Testing bool operators" << std::endl;
 	std::cout << std::boolalpha << (WeakBase0 == WeakBase1) << std::endl;
 	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
+#endif
 
 #if 0
 	//Performance
 	BenchMark();
 #endif
+
+	std::vector<Vec3> a;
+	a.emplace(a.begin(), 1.0, 1.0, 1.0);
 
 	return 0;
 }

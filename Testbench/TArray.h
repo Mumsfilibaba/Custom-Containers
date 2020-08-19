@@ -8,8 +8,9 @@ template<typename T>
 class TArray
 {
 public:
-	typedef T		ValueType;
-	typedef Uint32	SizeType;
+	typedef T		TType;
+	typedef Uint32	TSize;
+	typedef TType*	TPointer;
 
 	/*
 	* Constant Iterator
@@ -21,17 +22,17 @@ public:
 	public:
 		~ConstIterator() = default;
 
-		FORCEINLINE ConstIterator(ValueType* InPtr = nullptr)
+		FORCEINLINE explicit ConstIterator(TPointer InPtr = nullptr)
 			: Ptr(InPtr)
 		{
 		}
 
-		FORCEINLINE const ValueType* operator->() const
+		FORCEINLINE const TPointer operator->() const
 		{
 			return Ptr;
 		}
 
-		FORCEINLINE const ValueType& operator*() const
+		FORCEINLINE const TType& operator*() const
 		{
 			return *Ptr;
 		}
@@ -117,7 +118,7 @@ public:
 		}
 
 	protected:
-		ValueType* Ptr;
+		TPointer Ptr;
 	};
 
 	/*
@@ -130,19 +131,19 @@ public:
 	public:
 		~Iterator() = default;
 
-		FORCEINLINE Iterator(ValueType* InPtr = nullptr)
+		FORCEINLINE explicit Iterator(TPointer InPtr = nullptr)
 			: ConstIterator(InPtr)
 		{
 		}
 
-		FORCEINLINE ValueType* operator->() const
+		FORCEINLINE TPointer operator->() const
 		{
-			return const_cast<ValueType*>(ConstIterator::operator->());
+			return const_cast<TPointer>(ConstIterator::operator->());
 		}
 
-		FORCEINLINE ValueType& operator*() const
+		FORCEINLINE TType& operator*() const
 		{
-			return const_cast<ValueType&>(ConstIterator::operator*());
+			return const_cast<TType&>(ConstIterator::operator*());
 		}
 
 		FORCEINLINE Iterator operator++()
@@ -197,6 +198,172 @@ public:
 	};
 
 	/*
+	* Reverse Constant Iterator 
+	* Stores for example End(), but will reference End() - 1
+	*/
+	class ReverseConstIterator
+	{
+		friend class TArray;
+
+	public:
+		~ReverseConstIterator() = default;
+
+		FORCEINLINE explicit ReverseConstIterator(TPointer InPtr = nullptr)
+			: Ptr(InPtr)
+		{
+		}
+
+		FORCEINLINE const TPointer operator->() const
+		{
+			return (Ptr - 1);
+		}
+
+		FORCEINLINE const TType& operator*() const
+		{
+			return *(Ptr - 1);
+		}
+
+		FORCEINLINE ReverseConstIterator operator++()
+		{
+			Ptr--;
+			return *this;
+		}
+
+		FORCEINLINE ReverseConstIterator operator++(Int32)
+		{
+			ConstIterator Temp = *this;
+			Ptr--;
+			return Temp;
+		}
+
+		FORCEINLINE ReverseConstIterator operator--()
+		{
+			Ptr++;
+			return *this;
+		}
+
+		FORCEINLINE ReverseConstIterator operator--(Int32)
+		{
+			ReverseConstIterator Temp = *this;
+			Ptr++;
+			return Temp;
+		}
+
+		FORCEINLINE ReverseConstIterator operator+(Int32 Offset) const
+		{
+			ReverseConstIterator Temp = *this;
+			return Temp += Offset;
+		}
+
+		FORCEINLINE ReverseConstIterator operator-(Int32 Offset) const
+		{
+			ReverseConstIterator Temp = *this;
+			return Temp -= Offset;
+		}
+
+		FORCEINLINE ReverseConstIterator& operator+=(Int32 Offset)
+		{
+			Ptr -= Offset;
+			return *this;
+		}
+
+		FORCEINLINE ReverseConstIterator& operator-=(Int32 Offset)
+		{
+			Ptr += Offset;
+			return *this;
+		}
+
+		FORCEINLINE bool operator==(const ReverseConstIterator& Other) const
+		{
+			return (Ptr == Other.Ptr);
+		}
+
+		FORCEINLINE bool operator!=(const ReverseConstIterator& Other) const
+		{
+			return (Ptr != Other.Ptr);
+		}
+
+	protected:
+		TPointer Ptr;
+	};
+
+	/*
+	* Standard Reverse Iterator
+	*/
+	class ReverseIterator : public ReverseConstIterator
+	{
+		friend class TArray;
+
+	public:
+		~ReverseIterator() = default;
+
+		FORCEINLINE explicit ReverseIterator(TPointer InPtr = nullptr)
+			: ReverseConstIterator(InPtr)
+		{
+		}
+
+		FORCEINLINE TPointer operator->() const
+		{
+			return const_cast<TPointer>(ReverseConstIterator::operator->());
+		}
+
+		FORCEINLINE TType& operator*() const
+		{
+			return const_cast<TType&>(ReverseConstIterator::operator*());
+		}
+
+		FORCEINLINE ReverseIterator operator++()
+		{
+			ReverseConstIterator::operator++();
+			return *this;
+		}
+
+		FORCEINLINE ReverseIterator operator++(Int32)
+		{
+			ReverseIterator Temp = *this;
+			ReverseConstIterator::operator++();
+			return Temp;
+		}
+
+		FORCEINLINE ReverseIterator operator--()
+		{
+			ReverseConstIterator::operator--();
+			return *this;
+		}
+
+		FORCEINLINE ReverseIterator operator--(Int32)
+		{
+			ReverseIterator Temp = *this;
+			ReverseConstIterator::operator--();
+			return Temp;
+		}
+
+		FORCEINLINE ReverseIterator operator+(Int32 Offset) const
+		{
+			ReverseIterator Temp = *this;
+			return Temp += Offset;
+		}
+
+		FORCEINLINE ReverseIterator operator-(Int32 Offset) const
+		{
+			ReverseIterator Temp = *this;
+			return Temp -= Offset;
+		}
+
+		FORCEINLINE ReverseIterator& operator+=(Int32 Offset)
+		{
+			ReverseConstIterator::operator+=(Offset);
+			return *this;
+		}
+
+		FORCEINLINE ReverseIterator& operator-=(Int32 Offset)
+		{
+			ReverseConstIterator::operator-=(Offset);
+			return *this;
+		}
+	};
+
+	/*
 	* TArray API
 	*/
 public:
@@ -207,15 +374,12 @@ public:
 	{
 	}
 
-	FORCEINLINE explicit TArray(SizeType InSize, const ValueType& Value = ValueType()) noexcept
+	FORCEINLINE explicit TArray(TSize InSize, const TType& Value = TType()) noexcept
 		: Data(nullptr)
 		, Size(0)
 		, Capacity(0)
 	{
-		Reserve(InSize);
-
-		Size = InSize;
-		InternalMemset(Begin(), End(), Value);
+		InternalConstruct(InSize, Value);
 	}
 
 	FORCEINLINE explicit TArray(Iterator InBegin, Iterator InEnd) noexcept
@@ -223,29 +387,15 @@ public:
 		, Size(0)
 		, Capacity(0)
 	{
-		VALIDATE(InBegin < InEnd);
-
-		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-		Iterator NewRange = InternalAllocateElements(Count);
-		InternalCopyEmplace(InBegin, InEnd, NewRange);
-
-		Data = NewRange.Ptr;
-		Size = Count;
-		Capacity = Count;
+		InternalConstruct(InBegin, InEnd);
 	}
 
-	FORCEINLINE TArray(std::initializer_list<ValueType> IList) noexcept
+	FORCEINLINE TArray(std::initializer_list<TType> IList) noexcept
 		: Data(nullptr)
 		, Size(0)
 		, Capacity(0)
 	{
-		const SizeType Count = static_cast<SizeType>(IList.size());
-		Iterator NewRange = InternalAllocateElements(Count);
-		InternalMoveEmplace(IList, NewRange);
-
-		Data = NewRange.Ptr;
-		Size = Count;
-		Capacity = Count;
+		InternalConstruct(IList);
 	}
 
 	FORCEINLINE TArray(const TArray& Other) noexcept
@@ -253,26 +403,15 @@ public:
 		, Size(0)
 		, Capacity(0)
 	{
-		ConstIterator ItBegin = Other.Begin();
-		ConstIterator ItEnd = Other.End();
-
-		const SizeType Count = static_cast<SizeType>(ItEnd.Ptr - ItBegin.Ptr);
-		Iterator NewRange = InternalAllocateElements(Count);
-		InternalCopyEmplace(ItBegin, ItEnd, NewRange);
-
-		Data = NewRange.Ptr;
-		Size = Count;
-		Capacity = Count;
+		InternalConstruct(Other.Begin(), Other.End());
 	}
 
 	FORCEINLINE TArray(TArray&& Other) noexcept
-		: Data(Other.Data)
-		, Size(Other.Size)
-		, Capacity(Other.Capacity)
+		: Data(nullptr)
+		, Size(0)
+		, Capacity(0)
 	{
-		Other.Data = nullptr;
-		Other.Size = 0;
-		Other.Capacity = 0;
+		InternalMove(Move(Other));
 	}
 
 	FORCEINLINE ~TArray()
@@ -287,66 +426,31 @@ public:
 
 	FORCEINLINE void Clear() noexcept
 	{
-		InternalDestructRange(Begin(), InternalRealEnd());
+		InternalDestructRange(InternalBegin(), InternalRealEnd());
 		Size = 0;
 	}
 
-	FORCEINLINE void Assign(SizeType InSize, const ValueType& Value = ValueType()) noexcept
+	FORCEINLINE void Assign(TSize InSize, const TType& Value = TType()) noexcept
 	{
 		Clear();
-		Reserve(InSize);
-
-		Size = InSize;
-		InternalMemset(Begin(), End(), Value);
+		InternalConstruct(InSize, Value);
 	}
 
 	FORCEINLINE void Assign(Iterator InBegin, Iterator InEnd) noexcept
 	{
-		// Does not make sense to assign a range from this TArray, since they could overlap
-		VALIDATE(InternalIsRangeOwner(InBegin, InEnd) == false);
-		VALIDATE(InBegin < InEnd);
-
 		Clear();
-
-		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-		if (Count > Capacity)
-		{
-			Iterator NewRange = InternalAllocateElements(Count);
-			InternalReleaseData();
-			Data = NewRange.Ptr;
-			Capacity = Count;
-		}
-
-		InternalCopyEmplace(InBegin, InEnd, Begin());
-		Size = Count;
-		if (Size < Capacity)
-		{
-			InternalConstructRange(End(), InternalRealEnd());
-		}
+		InternalConstruct(InBegin, InEnd);
+		InternalFillConstruct();
 	}
 
-	FORCEINLINE void Assign(std::initializer_list<ValueType> IList) noexcept
+	FORCEINLINE void Assign(std::initializer_list<TType> IList) noexcept
 	{
 		Clear();
-
-		const SizeType Count = static_cast<SizeType>(IList.size());
-		if (Count > Capacity)
-		{
-			Iterator NewRange = InternalAllocateElements(Count);
-			InternalReleaseData();
-			Data = NewRange.Ptr;
-			Capacity = Count;
-		}
-
-		InternalMoveEmplace(IList, Begin());
-		Size = Count;
-		if (Size < Capacity)
-		{
-			InternalConstructRange(End(), InternalRealEnd());
-		}
+		InternalConstruct(IList);
+		InternalFillConstruct();
 	}
 
-	FORCEINLINE void Resize(SizeType InSize, const ValueType& Value = ValueType()) noexcept
+	FORCEINLINE void Resize(TSize InSize, const TType& Value = TType()) noexcept
 	{
 		if (InSize == Size)
 		{
@@ -361,20 +465,21 @@ public:
 		{
 			if (InSize >= Capacity)
 			{
-				Reserve(InSize + (Capacity / 2) + 1);
+				const TSize NewCapacity = InSize + (Capacity / 2) + 1;
+				InternalEmplaceRealloc(NewCapacity, InternalEnd(), InSize - Size);
 			}
 
-			InternalMemset(Begin() + Size, End() + (InSize - Size), Value);
+			InternalCopyEmplace(InSize - Size, Value, InternalEnd());
 		}
 		else if (InSize < Size)
 		{
-			InternalDestructRange(Begin() + InSize, End());
+			InternalDestructRange(InternalBegin() + InSize, InternalEnd());
 		}
 
 		Size = InSize;
 	}
 
-	FORCEINLINE void Reserve(SizeType InCapacity) noexcept
+	FORCEINLINE void Reserve(TSize InCapacity) noexcept
 	{
 		if (InCapacity == Capacity)
 		{
@@ -383,104 +488,48 @@ public:
 
 		if (InCapacity < Size)
 		{
-			InternalDestructRange(Begin() + InCapacity, End());
 			Size = InCapacity;
 		}
 
-		Iterator NewRange = InternalAllocateElements(InCapacity);
-		InternalMoveEmplace(Begin(), End(), NewRange);
-		InternalConstructRange(NewRange + Size, NewRange + InCapacity);
+		TPointer TempData = InternalAllocateElements(InCapacity);
+		InternalMoveEmplace(InternalBegin(), InternalEnd(), TempData);
 
-		InternalDestructRange(Begin(), InternalRealEnd());
+		InternalConstructRange(TempData + Size, TempData + InCapacity);
+		InternalDestructRange(InternalBegin(), InternalRealEnd());
 		InternalReleaseData();
 
-		Data = NewRange.Ptr;
-		Capacity = InCapacity;
-	}
-
-	FORCEINLINE ValueType& PushBack(const ValueType& Element) noexcept
-	{
-		Iterator ItEnd = End();
-		if (Size >= Capacity)
-		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItEnd, NewRange);
-			InternalConstructRange(NewRange + (Size + 1), NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Data = NewRange.Ptr;
-			Capacity = NewCapacity;
-
-			ItEnd = End();
-		}
-		else
-		{
-			InternalDestruct(ItEnd);
-		}
-
-		new(ItEnd.Ptr) ValueType(Element);
-		Size++;
-		return (*ItEnd);
-	}
-
-	FORCEINLINE ValueType& PushBack(ValueType&& Element) noexcept
-	{
-		Iterator ItEnd = End();
-		if (Size >= Capacity)
-		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItEnd, NewRange);
-			InternalConstructRange(NewRange + (Size + 1), NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Data = NewRange.Ptr;
-			Capacity = NewCapacity;
-
-			ItEnd = End();
-		}
-		else
-		{
-			InternalDestruct(ItEnd);
-		}
-
-		new(ItEnd.Ptr) ValueType(Move(Element));
-		Size++;
-		return (*ItEnd);
+		Data		= TempData;
+		Capacity	= InCapacity;
 	}
 
 	template<typename... TArgs>
-	FORCEINLINE ValueType& EmplaceBack(TArgs&&... Args) noexcept
+	FORCEINLINE TType& EmplaceBack(TArgs&&... Args) noexcept
 	{
-		Iterator ItEnd = End();
+		TPointer ItEnd = InternalEnd();
 		if (Size >= Capacity)
 		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItEnd, NewRange);
-			InternalConstructRange(NewRange + (Size + 1), NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Data = NewRange.Ptr;
-			Capacity = NewCapacity;
-
-			ItEnd = End();
+			const TSize NewCapacity = InternalGetResizeFactor();
+			InternalEmplaceRealloc(NewCapacity, ItEnd, 1);
+			ItEnd = InternalEnd();
 		}
 		else
 		{
 			InternalDestruct(ItEnd);
 		}
 
-		new(ItEnd.Ptr) ValueType(Forward<TArgs>(Args)...);
+		new(ItEnd) TType(Forward<TArgs>(Args)...);
 		Size++;
 		return (*ItEnd);
+	}
+
+	FORCEINLINE TType& PushBack(const TType& Element) noexcept
+	{
+		return EmplaceBack(Element);
+	}
+
+	FORCEINLINE TType& PushBack(TType&& Element) noexcept
+	{
+		return EmplaceBack(Move(Element));
 	}
 
 	template<typename... TArgs>
@@ -492,153 +541,65 @@ public:
 			return (End() - 1);
 		}
 
-		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
-
-		Iterator ItBegin = Begin() + Index;
+		const TSize Index = InternalIndex(Pos);
+		TPointer ItBegin = InternalBegin() + Index;
 		if (Size >= Capacity)
 		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItBegin, NewRange);
-			InternalMoveEmplace(ItBegin, End(), NewRange + Index + 1);
-			InternalConstructRange(NewRange + (Size + 1), NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Capacity = NewCapacity;
-			Data = NewRange.Ptr;
-
-			ItBegin = Begin() + Index;
+			const TSize NewCapacity = InternalGetResizeFactor();
+			InternalEmplaceRealloc(NewCapacity, ItBegin, 1);
+			ItBegin = InternalBegin() + Index;
 		}
 		else
 		{
-			InternalMemmoveForward(ItBegin, End(), End());
+			InternalMemmoveForward(ItBegin, InternalEnd(), InternalEnd());
 			InternalDestruct(ItBegin);
 		}
 
-		new (ItBegin.Ptr) ValueType(Forward<TArgs>(Args)...);
+		new (ItBegin) TType(Forward<TArgs>(Args)...);
 		Size++;
-		return ItBegin;
+		return Iterator(ItBegin);
 	}
 
-	FORCEINLINE Iterator Insert(ConstIterator Pos, const ValueType& Value) noexcept
+	FORCEINLINE Iterator Insert(ConstIterator Pos, const TType& Value) noexcept
 	{
-		if (Pos == End())
-		{
-			PushBack(Value);
-			return (End() - 1);
-		}
-
-		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
-
-		Iterator ItBegin = Begin() + Index;
-		if (Size >= Capacity)
-		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItBegin, NewRange);
-			InternalMoveEmplace(ItBegin, End(), NewRange + Index + 1);
-			InternalConstructRange(NewRange + (Size + 1), NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Capacity = NewCapacity;
-			Data = NewRange.Ptr;
-
-			ItBegin = Begin() + Index;
-		}
-		else
-		{
-			InternalMemmoveForward(ItBegin, End(), End());
-			InternalDestruct(ItBegin);
-		}
-
-		new(ItBegin.Ptr) ValueType(Value);
-		Size++;
-		return ItBegin;
+		return Emplace(Pos, Value);
 	}
 
-	FORCEINLINE Iterator Insert(ConstIterator Pos, ValueType&& Value) noexcept
+	FORCEINLINE Iterator Insert(ConstIterator Pos, TType&& Value) noexcept
 	{
-		if (Pos == End())
-		{
-			PushBack(Value);
-			return (End() - 1);
-		}
-
-		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
-
-		Iterator ItBegin = Begin() + Index;
-		if (Size >= Capacity)
-		{
-			const SizeType NewCapacity = InternalGetResizeFactor();
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItBegin, NewRange);
-			InternalMoveEmplace(ItBegin, End(), NewRange + Index + 1);
-			InternalConstructRange(NewRange + Size + 1, NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Capacity = NewCapacity;
-			Data = NewRange.Ptr;
-
-			ItBegin = Begin() + Index;
-		}
-		else
-		{
-			InternalMemmoveForward(ItBegin, End(), End());
-			InternalDestruct(ItBegin);
-		}
-
-		new(ItBegin.Ptr) ValueType(Move(Value));
-		Size++;
-		return ItBegin;
+		return Emplace(Pos, Move(Value));
 	}
 
-	FORCEINLINE Iterator Insert(ConstIterator Pos, std::initializer_list<ValueType> IList) noexcept
+	FORCEINLINE Iterator Insert(ConstIterator Pos, std::initializer_list<TType> IList) noexcept
 	{
-		const SizeType Count = static_cast<SizeType>(IList.size());
-		const SizeType NewSize = Size + Count;
-		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
+		const TSize ListSize	= static_cast<TSize>(IList.size());
+		const TSize NewSize		= Size + ListSize;
+		const TSize Index		= InternalIndex(Pos);
 
-		Iterator ItBegin = Begin() + Index;
+		TPointer ItBegin = InternalBegin() + Index;
 		if (NewSize >= Capacity)
 		{
-			const SizeType NewCapacity = NewSize + (Capacity / 2) + 1;
-			Iterator NewRange = InternalAllocateElements(NewCapacity);
-			InternalMoveEmplace(Begin(), ItBegin, NewRange);
-			InternalMoveEmplace(ItBegin, End(), NewRange + Index + Count);
-			InternalConstructRange(NewRange + Size + Count, NewRange + NewCapacity);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Capacity = NewCapacity;
-			Data = NewRange.Ptr;
-
-			ItBegin = Begin() + Index;
+			const TSize NewCapacity = NewSize + (Capacity / 2) + 1;
+			InternalEmplaceRealloc(NewCapacity, ItBegin, ListSize);
+			ItBegin = InternalBegin() + Index;
 		}
 		else
 		{
-			InternalMemmoveForward(ItBegin, End(), End() + (Count - 1));
-			InternalDestructRange(ItBegin, ItBegin + Count);
+			InternalMemmoveForward(ItBegin, InternalEnd(), InternalEnd() + (ListSize - 1));
+			InternalDestructRange(ItBegin, ItBegin + ListSize);
 		}
 
 		InternalMoveEmplace(IList, ItBegin);
-
 		Size = NewSize;
-		return ItBegin;
+		return Iterator(ItBegin);
 	}
 
-	FORCEINLINE Iterator PopBack() noexcept
+	FORCEINLINE void PopBack() noexcept
 	{
-		VALIDATE(Size > 0);
-
-		InternalDestruct(Begin() + (--Size));
-		return End();
+		if (Size > 0)
+		{
+			InternalDestruct(InternalBegin() + (--Size));
+		}
 	}
 
 	FORCEINLINE Iterator Erase(Iterator Pos) noexcept
@@ -652,17 +613,13 @@ public:
 
 		if (Pos == End())
 		{
-			return PopBack();
+			PopBack();
+			return End();
 		}
-
-		InternalDestruct(Pos);
-
-		const SizeType Index = static_cast<SizeType>(Pos.Ptr - Begin().Ptr);
-		Iterator ItBegin = Begin() + Index;
-		InternalMemmoveBackwards(ItBegin + 1, End(), ItBegin);
-
-		Size--;
-		return ItBegin;
+		else
+		{
+			return Erase(Pos, Pos + 1);
+		}
 	}
 
 	FORCEINLINE Iterator Erase(Iterator InBegin, Iterator InEnd) noexcept
@@ -675,29 +632,29 @@ public:
 		VALIDATE(InBegin < InEnd);
 		VALIDATE(InternalIsRangeOwner(InBegin, InEnd));
 
-		InternalDestructRange(InBegin, InEnd);
+		InternalDestructRange(InBegin.Ptr, InEnd.Ptr);
 
-		const SizeType Index = static_cast<SizeType>(InBegin.Ptr - Begin().Ptr);
-		const SizeType Offset = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
+		const TSize Index	= static_cast<TSize>(InBegin.Ptr - InternalBegin());
+		const TSize Offset	= static_cast<TSize>(InEnd.Ptr - InBegin.Ptr);
 
-		Iterator ItBegin = Begin() + Index;
-		Iterator ItOffset = ItBegin + Offset;
-		if (ItOffset < End())
+		TPointer ItBegin	= InternalBegin() + Index;
+		TPointer ItOffset	= ItBegin + Offset;
+		if (ItOffset < InternalEnd())
 		{
-			InternalMemmoveBackwards(ItOffset, End(), ItBegin);
+			InternalMemmoveBackwards(ItOffset, InternalEnd(), ItBegin);
 		}
 
 		Size -= Offset;
-		return ItBegin;
+		return Iterator(ItBegin);
 	}
 
 	FORCEINLINE void Swap(TArray& Other) noexcept
 	{
 		if (this != std::addressof(Other))
 		{
-			ValueType* TempPtr = Data;
-			SizeType	TempSize = Size;
-			SizeType	TempCapacity = Capacity;
+			TPointer	TempPtr = Data;
+			TSize		TempSize = Size;
+			TSize		TempCapacity = Capacity;
 
 			Data = Other.Data;
 			Size = Other.Size;
@@ -713,14 +670,7 @@ public:
 	{
 		if (Capacity > Size)
 		{
-			Iterator NewRange = InternalAllocateElements(Size);
-			InternalMoveEmplace(Begin(), End(), NewRange);
-
-			InternalDestructRange(Begin(), InternalRealEnd());
-			InternalReleaseData();
-
-			Data = NewRange.Ptr;
-			Capacity = Size;
+			InternalEmplaceRealloc(Size, InternalEnd(), 0);
 		}
 	}
 
@@ -749,57 +699,97 @@ public:
 		return ConstIterator(Data + Size);
 	}
 
-	FORCEINLINE ValueType& GetFront() noexcept
+	FORCEINLINE ConstIterator ConstBegin() const noexcept
+	{
+		return ConstIterator(Data);
+	}
+
+	FORCEINLINE ConstIterator ConstEnd() const noexcept
+	{
+		return ConstIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseIterator ReverseBegin() noexcept
+	{
+		return ReverseIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseIterator ReverseEnd() noexcept
+	{
+		return ReverseIterator(Data);
+	}
+
+	FORCEINLINE ReverseConstIterator ReverseBegin() const noexcept
+	{
+		return ReverseConstIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseConstIterator ReverseEnd() const noexcept
+	{
+		return ReverseConstIterator(Data);
+	}
+
+	FORCEINLINE ReverseConstIterator ConstReverseBegin() const noexcept
+	{
+		return ReverseConstIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseConstIterator ConstReverseEnd() const noexcept
+	{
+		return ReverseConstIterator(Data);
+	}
+
+	FORCEINLINE TType& GetFront() noexcept
 	{
 		VALIDATE(Size > 0);
 		return Data[0];
 	}
 
-	FORCEINLINE const ValueType& GetFront() const noexcept
+	FORCEINLINE const TType& GetFront() const noexcept
 	{
 		VALIDATE(Size > 0);
 		return Data[0];
 	}
 
-	FORCEINLINE ValueType& GetBack() noexcept
+	FORCEINLINE TType& GetBack() noexcept
 	{
 		VALIDATE(Size > 0);
 		return Data[Size - 1];
 	}
 
-	FORCEINLINE const ValueType& GetBack() const noexcept
+	FORCEINLINE const TType& GetBack() const noexcept
 	{
 		VALIDATE(Size > 0);
 		return Data[Size - 1];
 	}
 
-	FORCEINLINE ValueType* GetData() noexcept
+	FORCEINLINE TPointer GetData() noexcept
 	{
 		return Data;
 	}
 
-	FORCEINLINE const ValueType* GetData() const noexcept
+	FORCEINLINE const TPointer GetData() const noexcept
 	{
 		return Data;
 	}
 
-	FORCEINLINE SizeType GetSize() const noexcept
+	FORCEINLINE TSize GetSize() const noexcept
 	{
 		return Size;
 	}
 
-	FORCEINLINE SizeType GetCapacity() const noexcept
+	FORCEINLINE TSize GetCapacity() const noexcept
 	{
 		return Capacity;
 	}
 
-	FORCEINLINE ValueType& GetElementAt(SizeType Index) noexcept
+	FORCEINLINE TType& GetElementAt(TSize Index) noexcept
 	{
 		VALIDATE(Index < Size);
 		return Data[Index];
 	}
 
-	FORCEINLINE const ValueType& GetElementAt(SizeType Index) const noexcept
+	FORCEINLINE const TType& GetElementAt(TSize Index) const noexcept
 	{
 		VALIDATE(Index < Size);
 		return Data[Index];
@@ -810,21 +800,8 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Clear();
-
-			if (Capacity < Other.Size)
-			{
-				Iterator NewRange = InternalAllocateElements(Other.Size);
-				InternalReleaseData();
-				Data = NewRange.Ptr;
-				Capacity = Other.Size;
-			}
-
-			InternalCopyEmplace(Other.Begin(), Other.End(), Begin());
-			Size = Other.Size;
-			if (Size < Capacity)
-			{
-				InternalConstructRange(End(), InternalRealEnd());
-			}
+			InternalConstruct(Other.Begin(), Other.End());
+			InternalFillConstruct();
 		}
 
 		return *this;
@@ -835,33 +812,25 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Clear();
-
 			InternalReleaseData();
-
-			Data = Other.Data;
-			Size = Other.Size;
-			Capacity = Other.Capacity;
-
-			Other.Data = nullptr;
-			Other.Size = 0;
-			Other.Capacity = 0;
+			InternalMove(Move(Other));
 		}
 
 		return *this;
 	}
 
-	FORCEINLINE TArray& operator=(std::initializer_list<ValueType> IList) noexcept
+	FORCEINLINE TArray& operator=(std::initializer_list<TType> IList) noexcept
 	{
 		Assign(IList);
 		return *this;
 	}
 
-	FORCEINLINE ValueType& operator[](SizeType Index) noexcept
+	FORCEINLINE TType& operator[](TSize Index) noexcept
 	{
 		return GetElementAt(Index);
 	}
 
-	FORCEINLINE const ValueType& operator[](SizeType Index) const noexcept
+	FORCEINLINE const TType& operator[](TSize Index) const noexcept
 	{
 		return GetElementAt(Index);
 	}
@@ -890,12 +859,64 @@ public:
 		return ConstIterator(Data + Size);
 	}
 
-private:
-	FORCEINLINE Iterator InternalRealEnd() const noexcept
+	FORCEINLINE ConstIterator cbegin() const noexcept
 	{
-		return Iterator(Data + Capacity);
+		return ConstIterator(Data);
 	}
 
+	FORCEINLINE ConstIterator cend() const noexcept
+	{
+		return ConstIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseIterator rbegin() noexcept
+	{
+		return ReverseIterator(Data);
+	}
+
+	FORCEINLINE ReverseIterator rend() noexcept
+	{
+		return ReverseIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseConstIterator rbegin() const noexcept
+	{
+		return ReverseConstIterator(Data);
+	}
+
+	FORCEINLINE ReverseConstIterator rend() const noexcept
+	{
+		return ReverseConstIterator(Data + Size);
+	}
+
+	FORCEINLINE ReverseConstIterator crbegin() const noexcept
+	{
+		return ReverseConstIterator(Data);
+	}
+
+	FORCEINLINE ReverseConstIterator crend() const noexcept
+	{
+		return ReverseConstIterator(Data + Size);
+	}
+
+private:
+	// Internally use pointers for iterating
+	FORCEINLINE TPointer InternalBegin() const noexcept
+	{
+		return Data;
+	}
+
+	FORCEINLINE TPointer InternalEnd() const noexcept
+	{
+		return Data + Size;
+	}
+	
+	FORCEINLINE TPointer InternalRealEnd() const noexcept
+	{
+		return Data + Capacity;
+	}
+
+	// Check is the iterator belongs to this TArray
 	FORCEINLINE bool InternalIsRangeOwner(ConstIterator InBegin, ConstIterator InEnd)
 	{
 		return (InBegin < InEnd) && (InBegin >= Begin()) && (InEnd <= End());
@@ -906,15 +927,31 @@ private:
 		return (It >= Begin()) && (It <= End());
 	}
 
-	FORCEINLINE SizeType InternalGetResizeFactor() const
+	// Helpers
+	FORCEINLINE TSize InternalDistance(ConstIterator InBegin, ConstIterator InEnd)
 	{
-		return Size + (Capacity)+1;
+		return static_cast<TSize>(InEnd.Ptr - InBegin.Ptr);
 	}
 
-	FORCEINLINE Iterator InternalAllocateElements(SizeType InCapacity)
+	FORCEINLINE TSize InternalIndex(ConstIterator Pos)
 	{
-		constexpr SizeType ElementByteSize = sizeof(ValueType);
-		return Iterator(reinterpret_cast<ValueType*>(malloc(static_cast<size_t>(ElementByteSize) * InCapacity)));
+		return static_cast<TSize>(Pos.Ptr - Data);
+	}
+
+	FORCEINLINE TSize InternalIndex(TPointer Pos)
+	{
+		return static_cast<TSize>(Pos - Data);
+	}
+
+	FORCEINLINE TSize InternalGetResizeFactor() const
+	{
+		return Size + (Capacity) + 1;
+	}
+
+	FORCEINLINE TPointer InternalAllocateElements(TSize InCapacity)
+	{
+		constexpr TSize ElementByteSize = sizeof(TType);
+		return reinterpret_cast<TPointer>(malloc(static_cast<size_t>(ElementByteSize) * InCapacity));
 	}
 
 	FORCEINLINE void InternalReleaseData()
@@ -925,125 +962,158 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalCopyEmplace(ConstIterator InBegin, ConstIterator InEnd, Iterator Dest)
+	FORCEINLINE void InternalAllocData(TSize InCapacity)
+	{
+		if (InCapacity > Capacity)
+		{
+			InternalReleaseData();
+
+			Data = InternalAllocateElements(InCapacity);
+			Capacity = InCapacity;
+		}
+	}
+
+	FORCEINLINE void InternalEmplaceRealloc(TSize InCapacity, TPointer EmplacePos, TSize Count)
+	{
+		VALIDATE(InCapacity >= Size + Count);
+
+		const TSize Index = InternalIndex(EmplacePos);
+		TPointer TempData = InternalAllocateElements(InCapacity);
+		InternalMoveEmplace(Data, EmplacePos, TempData);
+		
+		if (EmplacePos != InternalEnd())
+		{
+			InternalMoveEmplace(EmplacePos, InternalRealEnd(), TempData + Index + Count);
+		}
+
+		if (InCapacity > Size + Count)
+		{
+			InternalConstructRange(TempData + Size + Count, TempData + InCapacity);
+		}
+
+		InternalDestructRange(InternalBegin(), InternalRealEnd());
+		InternalReleaseData();
+
+		Data		= TempData;
+		Capacity	= InCapacity;
+	}
+
+	// Construct
+	FORCEINLINE void InternalConstruct(TSize InSize, const TType& Value)
+	{
+		if (InSize > 0)
+		{
+			InternalAllocData(InSize);
+			InternalCopyEmplace(InSize, Value, Data);
+			Size = InSize;
+		}
+	}
+
+	FORCEINLINE void InternalConstruct(ConstIterator InBegin, ConstIterator InEnd)
+	{
+		VALIDATE(InternalIsRangeOwner(InBegin, InEnd) == false);
+
+		const TSize Distance = InternalDistance(InBegin, InEnd);
+		if (Distance > 0)
+		{
+			InternalAllocData(Distance);
+			InternalCopyEmplace(InBegin.Ptr, InEnd.Ptr, Data);
+			Size = Distance;
+		}
+	}
+
+	FORCEINLINE void InternalConstruct(std::initializer_list<TType> IList)
+	{
+		const TSize ListSize = static_cast<TSize>(IList.size());
+		if (ListSize > 0)
+		{
+			InternalAllocData(ListSize);
+			InternalMoveEmplace(IList, Data);
+			Size = ListSize;
+		}
+	}
+
+	FORCEINLINE void InternalFillConstruct()
+	{
+		if (Size < Capacity)
+		{
+			InternalConstructRange(InternalEnd(), InternalRealEnd());
+		}
+	}
+
+	FORCEINLINE void InternalMove(TArray&& Other)
+	{
+		Data = Other.Data;
+		Size = Other.Size;
+		Capacity = Other.Capacity;
+
+		Other.Data = nullptr;
+		Other.Size = 0;
+		Other.Capacity = 0;
+	}
+
+	// Emplace
+	FORCEINLINE void InternalCopyEmplace(TPointer InBegin, TPointer InEnd, TPointer Dest)
 	{
 		// This function assumes that there is no overlap
-		if constexpr (std::is_trivially_move_constructible<ValueType>())
+		if constexpr (std::is_trivially_move_constructible<TType>())
 		{
-			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize = Count * sizeof(ValueType);
-			memcpy(Dest.Ptr, InBegin.Ptr, CpySize);
+			const TSize Count = static_cast<TSize>(InEnd - InBegin);
+			const TSize CpySize = Count * sizeof(TType);
+			memcpy(Dest, InBegin, CpySize);
 		}
 		else
 		{
 			while (InBegin != InEnd)
 			{
-				new(Dest.Ptr) ValueType(*InBegin);
+				new(Dest) TType(*InBegin);
 				InBegin++;
 				Dest++;
 			}
 		}
 	}
 
-	FORCEINLINE void InternalMoveEmplace(Iterator InBegin, Iterator InEnd, Iterator Dest)
+	FORCEINLINE void InternalCopyEmplace(TSize InSize, const TType& Value, TPointer Dest)
 	{
-		// This function assumes that there is no overlap
-		if constexpr (std::is_trivially_move_constructible<ValueType>())
+		TPointer ItEnd = Dest + InSize;
+		while (Dest != ItEnd)
 		{
-			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize = Count * sizeof(ValueType);
-			memcpy(Dest.Ptr, InBegin.Ptr, CpySize);
-		}
-		else
-		{
-			while (InBegin != InEnd)
-			{
-				new(Dest.Ptr) ValueType(Move(*InBegin));
-				InBegin++;
-				Dest++;
-			}
-		}
-	}
-
-	FORCEINLINE void InternalMoveEmplace(std::initializer_list<ValueType> IList, Iterator Dest)
-	{
-		// This function assumes that there is no overlap
-		for (const ValueType& Value : IList)
-		{
-			new(Dest.Ptr) ValueType(Move(Value));
+			new(Dest) TType(Value);
 			Dest++;
 		}
 	}
 
-	FORCEINLINE void InternalMemset(Iterator InBegin, Iterator InEnd, const ValueType& Value)
+	FORCEINLINE void InternalMoveEmplace(TPointer InBegin, TPointer InEnd, TPointer Dest)
 	{
-		// Sets each object in the range to value
-		if constexpr (std::is_trivially_copyable<ValueType>() && (sizeof(ValueType) == sizeof(Char)))
+		// This function assumes that there is no overlap
+		if constexpr (std::is_trivially_move_constructible<TType>())
 		{
-			// We can use normal memset if this object is trivially copyable and has the size of maximumum of a char (basically only chars)
-			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize = Count * sizeof(ValueType);
-			memset(InBegin.Ptr, Value, CpySize);
-		}
-		else if constexpr (std::is_nothrow_copy_assignable<ValueType>())
-		{
-			while (InBegin != InEnd)
-			{
-				(*InBegin) = Value;
-				InBegin++;
-			}
-		}
-		else if constexpr (std::is_nothrow_copy_constructible<ValueType>())
-		{
-			while (InBegin != InEnd)
-			{
-				InternalDestruct(InBegin);
-				new(InBegin.Ptr) ValueType(Value);
-				InBegin++;
-			}
-		}
-		else if constexpr (std::is_nothrow_move_assignable<ValueType>())
-		{
-			while (InBegin != InEnd)
-			{
-				(*InBegin) = Move(const_cast<ValueType&>(Value));
-				InBegin++;
-			}
-		}
-		else if constexpr (std::is_nothrow_move_constructible<ValueType>())
-		{
-			while (InBegin != InEnd)
-			{
-				InternalDestruct(InBegin);
-				new(InBegin.Ptr) ValueType(Move(const_cast<ValueType&>(Value)));
-				InBegin++;
-			}
-		}
-	}
-
-	FORCEINLINE void InternalMemcpy(Iterator InBegin, Iterator InEnd, Iterator Dest)
-	{
-		// Copy each object in the range to the destination
-		// This functions assumes that the range is not overlapping
-
-		if constexpr (std::is_trivially_copyable<ValueType>())
-		{
-			const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-			const SizeType CpySize = Count * sizeof(ValueType);
-			memcpy(Dest.Ptr, InBegin.Ptr, CpySize);
+			const TSize Count = static_cast<TSize>(InEnd - InBegin);
+			const TSize CpySize = Count * sizeof(TType);
+			memcpy(Dest, InBegin, CpySize);
 		}
 		else
 		{
 			while (InBegin != InEnd)
 			{
-				(*Dest) = (*InBegin);
-				Dest++;
+				new(Dest) TType(Move(*InBegin));
 				InBegin++;
+				Dest++;
 			}
 		}
 	}
 
-	FORCEINLINE void InternalMemmoveBackwards(Iterator InBegin, Iterator InEnd, Iterator Dest)
+	FORCEINLINE void InternalMoveEmplace(std::initializer_list<TType> IList, TPointer Dest)
+	{
+		// This function assumes that there is no overlap
+		for (const TType& Value : IList)
+		{
+			new(Dest) TType(Move(Value));
+			Dest++;
+		}
+	}
+
+	FORCEINLINE void InternalMemmoveBackwards(TPointer InBegin, TPointer InEnd, TPointer Dest)
 	{
 		VALIDATE(InBegin <= InEnd);
 		if (InBegin == InEnd)
@@ -1052,16 +1122,16 @@ private:
 		}
 
 		VALIDATE(InEnd <= InternalRealEnd());
-		VALIDATE(InternalIsIteratorOwner(Dest));
+		VALIDATE(InternalIsIteratorOwner(ConstIterator(Dest)));
 
 		// Move each object in the range to the destination
 		// This functions assumes that the range is from this TArray (I.e It can overlap)
 
-		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-		if constexpr (std::is_trivially_move_assignable<ValueType>())
+		const TSize Count = static_cast<TSize>(InEnd - InBegin);
+		if constexpr (std::is_trivially_move_assignable<TType>())
 		{
-			const SizeType CpySize = Count * sizeof(ValueType);
-			memmove(Dest.Ptr, InBegin.Ptr, CpySize);
+			const TSize CpySize = Count * sizeof(TType);
+			memmove(Dest, InBegin, CpySize);
 		}
 		else
 		{
@@ -1074,17 +1144,17 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalMemmoveForward(Iterator InBegin, Iterator InEnd, Iterator Dest)
+	FORCEINLINE void InternalMemmoveForward(TPointer InBegin, TPointer InEnd, TPointer Dest)
 	{
 		// Move each object in the range to the destination, starts in the "End" and moves forward
-		const SizeType Count = static_cast<SizeType>(InEnd.Ptr - InBegin.Ptr);
-		if constexpr (std::is_trivially_move_assignable<ValueType>())
+		const TSize Count = static_cast<TSize>(InEnd - InBegin);
+		if constexpr (std::is_trivially_move_assignable<TType>())
 		{
 			if (Count > 0)
 			{
-				const SizeType CpySize = Count * sizeof(ValueType);
-				const SizeType OffsetSize = (Count - 1) * sizeof(ValueType);
-				memmove(reinterpret_cast<Char*>(Dest.Ptr) - OffsetSize, InBegin.Ptr, CpySize);
+				const TSize CpySize		= Count * sizeof(TType);
+				const TSize OffsetSize	= (Count - 1) * sizeof(TType);
+				memmove(reinterpret_cast<Char*>(Dest) - OffsetSize, InBegin, CpySize);
 			}
 		}
 		else
@@ -1098,21 +1168,21 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalDestruct(ConstIterator Pos)
+	FORCEINLINE void InternalDestruct(TPointer Pos)
 	{
 		// Calls the destructor (If it needs to be called)
-		if constexpr (std::is_trivially_destructible<ValueType>() == false)
+		if constexpr (std::is_trivially_destructible<TType>() == false)
 		{
-			(*Pos).~ValueType();
+			(*Pos).~TType();
 		}
 	}
 
-	FORCEINLINE void InternalDestructRange(ConstIterator InBegin, ConstIterator InEnd)
+	FORCEINLINE void InternalDestructRange(TPointer InBegin, TPointer InEnd)
 	{
 		VALIDATE(InBegin <= InEnd);
 
 		// Calls the destructor for every object in the range (If it needs to be called)
-		if constexpr (std::is_trivially_destructible<ValueType>() == false)
+		if constexpr (std::is_trivially_destructible<TType>() == false)
 		{
 			while (InBegin != InEnd)
 			{
@@ -1122,22 +1192,22 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalConstructRange(ConstIterator InBegin, ConstIterator InEnd)
+	FORCEINLINE void InternalConstructRange(TPointer InBegin, TPointer InEnd)
 	{
 		VALIDATE(InBegin <= InEnd);
 
 		// Calls the default constructor for every object in the range (If it can be called)
-		if constexpr (std::is_default_constructible<ValueType>())
+		if constexpr (std::is_default_constructible<TType>())
 		{
 			while (InBegin != InEnd)
 			{
-				new(InBegin.Ptr) ValueType();
+				new(InBegin) TType();
 				InBegin++;
 			}
 		}
 	}
 
-	ValueType* Data;
-	SizeType Size;
-	SizeType Capacity;
+	TPointer Data;
+	TSize Size;
+	TSize Capacity;
 };
