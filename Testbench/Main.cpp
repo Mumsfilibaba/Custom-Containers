@@ -995,7 +995,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 0
+#if 1
 	// TSharedPtr
 	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
 
