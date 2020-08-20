@@ -4,8 +4,11 @@
 #include <vector>
 #include <chrono>
 #include <string>
-#include <crtdbg.h>
 #include <memory>
+
+#ifdef _WIN32
+	#include <crtdbg.h>
+#endif
 
 #include "TArray.h"
 #include "TSharedPtr.h"
@@ -438,7 +441,9 @@ void BenchMark()
 
 int main(int Argc, const char* Argv[])
 {
+#ifdef _WIN32
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
 	// TArray
 #if 1
@@ -506,7 +511,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings1);
 
 		Strings4.Resize(10, "New String");
-		Strings3.Resize(0);
+		Strings3.Resize(0, "Hi, hi");
 		Strings1.Resize(6, "Hello World");
 
 		std::cout << "After Resize" << std::endl << std::endl;
@@ -620,15 +625,21 @@ int main(int Argc, const char* Argv[])
 
 		// Insert
 		std::cout << std::endl << "Testing Insert" << std::endl << std::endl;
+		PrintArr(Strings2);
+		
 		std::cout << "At front" << std::endl << std::endl;
 		Strings2.Insert(Strings2.Begin(), ArgvStr);
+		PrintArr(Strings2);
 		Strings2.Insert(Strings2.Begin(), "Inserted String");
+		PrintArr(Strings2);
 		Strings2.Insert(Strings2.Begin(), { "Inserted String #1", "Inserted String #2" });
 		PrintArr(Strings2);
 
 		std::cout << "At Arbitrary" << std::endl << std::endl;
 		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
+		PrintArr(Strings2);
 		Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again");
+		PrintArr(Strings2);
 		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again #1", "Inserted String Again #2" });
 		PrintArr(Strings2);
 
@@ -640,9 +651,11 @@ int main(int Argc, const char* Argv[])
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin(), ArgvStr);
+		PrintArr(Strings2);
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin(), "Inserted String Reallocated");
+		PrintArr(Strings2);
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin(), { "Inserted String Reallocated #1", "Inserted String Reallocated #2" });
@@ -652,9 +665,11 @@ int main(int Argc, const char* Argv[])
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin() + 2, ArgvStr);
+		PrintArr(Strings2);
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin() + 2, "Inserted String Again Reallocated");
+		PrintArr(Strings2);
 		// Add a shrink to fit to force reallocation
 		Strings2.ShrinkToFit();
 		Strings2.Insert(Strings2.Begin() + 2, { "Inserted String Again Reallocated #1", "Inserted String Again Reallocated #2" });
@@ -1029,7 +1044,7 @@ int main(int Argc, const char* Argv[])
 	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
 #endif
 
-#if 0
+#if 1
 	//Performance
 	BenchMark();
 #endif

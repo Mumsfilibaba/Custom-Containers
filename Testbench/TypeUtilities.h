@@ -2,7 +2,14 @@
 #include <cassert>
 
 #define VALIDATE(Condition)	assert((Condition))
-#define FORCEINLINE			__forceinline
+
+#if	defined(_WIN32)
+	#define FORCEINLINE	__forceinline
+#elif defined(__APPLE__)
+	#define FORCEINLINE	__attribute__((__always_inline__))
+#else
+	#define FORCEINLINE inline
+#endif
 
 typedef unsigned int		Uint32;
 typedef unsigned long long	Uint64;

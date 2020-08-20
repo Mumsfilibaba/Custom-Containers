@@ -1,8 +1,14 @@
-//Build
+// Build
 Build/
 
-//Visual Studio
+// Visual Studio
 .vs/
 *.sln
 *.vcxproj*
 
+// xcode
+*.xcodeproj*
+*.xcworkspace*
+
+// macoa files
+*.DS_STORE
