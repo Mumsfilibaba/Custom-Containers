@@ -163,7 +163,9 @@ private:
 	T* Ptr;
 };
 
-// Creates a new object together with a UniquePtr
+/*
+* Creates a new object together with a UniquePtr
+*/
 template<typename T, typename... TArgs>
 TUniquePtr<T> MakeUnique(TArgs&&... Args) noexcept
 {

@@ -196,7 +196,7 @@ public:
 	};
 
 	/*
-	* Reverse Constant Iterator 
+	* Reverse Constant Iterator
 	* Stores for example End(), but will reference End() - 1
 	*/
 	class ReverseConstIterator
@@ -379,7 +379,7 @@ public:
 	{
 		InternalConstruct(InSize);
 	}
-	
+
 	FORCEINLINE explicit TArray(SizeType InSize, const T& Value) noexcept
 		: Data(nullptr)
 		, Size(0)
@@ -401,7 +401,8 @@ public:
 		, Size(0)
 		, Capacity(0)
 	{
-		InternalConstruct(IList.begin(), IList.end());
+		// TODO: Get rid of const_cast
+		InternalConstruct(const_cast<T*>(IList.begin()), const_cast<T*>(IList.end()));
 	}
 
 	FORCEINLINE TArray(const TArray& Other) noexcept
@@ -441,7 +442,7 @@ public:
 		Clear();
 		InternalConstruct(InSize);
 	}
-	
+
 	FORCEINLINE void Assign(SizeType InSize, const T& Value) noexcept
 	{
 		Clear();
@@ -457,7 +458,9 @@ public:
 	FORCEINLINE void Assign(std::initializer_list<T> IList) noexcept
 	{
 		Clear();
-		InternalConstruct(IList.begin(), IList.end());
+
+		// TODO: Get rid of const_cast
+		InternalConstruct(const_cast<T*>(IList.begin()), const_cast<T*>(IList.end()));
 	}
 
 	FORCEINLINE void Resize(SizeType InSize) noexcept
@@ -469,7 +472,7 @@ public:
 				const SizeType NewCapacity = InternalGetResizeFactor(InSize);
 				InternalRealloc(NewCapacity);
 			}
-			
+
 			InternalDefaultConstructRange(Data + Size, Data + InSize);
 		}
 		else if (InSize < Size)
@@ -479,7 +482,7 @@ public:
 
 		Size = InSize;
 	}
-	
+
 	FORCEINLINE void Resize(SizeType InSize, const T& Value) noexcept
 	{
 		if (InSize > Size)
@@ -489,7 +492,7 @@ public:
 				const SizeType NewCapacity = InternalGetResizeFactor(InSize);
 				InternalRealloc(NewCapacity);
 			}
-			
+
 			InternalCopyEmplace(InSize - Size, Value, Data + Size);
 		}
 		else if (InSize < Size)
@@ -509,14 +512,14 @@ public:
 			{
 				Size = InCapacity;
 			}
-			
+
 			T* TempData = InternalAllocateElements(InCapacity);
 			InternalMoveEmplace(Data, Data + Size, TempData);
 			InternalDestructRange(Data, Data + OldSize);
 			InternalReleaseData();
 
-			Data		= TempData;
-			Capacity	= InCapacity;
+			Data = TempData;
+			Capacity = InCapacity;
 		}
 	}
 
@@ -599,14 +602,14 @@ public:
 			{
 				EmplaceBack(Move(Value));
 			}
-			
+
 			return Iterator(Data + OldSize);
 		}
-		
+
 		// Insert
-		const SizeType ListSize		= static_cast<SizeType>(IList.size());
-		const SizeType NewSize		= Size + ListSize;
-		const SizeType Index		= InternalIndex(Pos);
+		const SizeType ListSize = static_cast<SizeType>(IList.size());
+		const SizeType NewSize = Size + ListSize;
+		const SizeType Index = InternalIndex(Pos);
 
 		T* RangeBegin = Data + Index;
 		if (NewSize >= Capacity)
@@ -618,15 +621,16 @@ public:
 		else
 		{
 			// Construct the range so that we can move to it
-			T* DataEnd 		= Data + Size;
-			T* NewDataEnd 	= Data + Size + ListSize;
-			T* RangeEnd 	= RangeBegin + ListSize;
+			T* DataEnd = Data + Size;
+			T* NewDataEnd = Data + Size + ListSize;
+			T* RangeEnd = RangeBegin + ListSize;
 			InternalDefaultConstructRange(DataEnd, NewDataEnd);
 			InternalMemmoveForward(RangeBegin, DataEnd, NewDataEnd - 1);
 			InternalDestructRange(RangeBegin, RangeEnd);
 		}
 
-		InternalMoveEmplace(IList.begin(), IList.end(), RangeBegin);
+		// TODO: Get rid of const_cast
+		InternalMoveEmplace(const_cast<T*>(IList.begin()), const_cast<T*>(IList.end()), RangeBegin);
 		Size = NewSize;
 		return Iterator(RangeBegin);
 	}
@@ -656,11 +660,11 @@ public:
 		}
 
 		// Erase
-		T* DataBegin 	= Pos.Ptr;
-		T* DataEnd 		= Data + Size;
-		InternalMemmoveBackwards(DataBegin + 1, DataEnd, Data);
+		T* DataBegin = Pos.Ptr;
+		T* DataEnd = Data + Size;
+		InternalMemmoveBackwards(DataBegin + 1, DataEnd, DataBegin);
 		InternalDestruct(DataEnd - 1);
-		
+
 		Size--;
 		return Iterator(DataBegin);
 	}
@@ -960,7 +964,7 @@ private:
 	{
 		return InternalDistance(InBegin.Ptr, InEnd.Ptr);
 	}
-	
+
 	FORCEINLINE SizeType InternalDistance(const T* InBegin, const T* InEnd)
 	{
 		return static_cast<SizeType>(InEnd - InBegin);
@@ -980,10 +984,10 @@ private:
 	{
 		return InternalGetResizeFactor(Size);
 	}
-	
+
 	FORCEINLINE SizeType InternalGetResizeFactor(SizeType BaseSize) const
 	{
-		return BaseSize + (Capacity) + 1;
+		return BaseSize + (Capacity)+1;
 	}
 
 	FORCEINLINE T* InternalAllocateElements(SizeType InCapacity)
@@ -1010,7 +1014,7 @@ private:
 			Capacity = InCapacity;
 		}
 	}
-	
+
 	FORCEINLINE void InternalRealloc(SizeType InCapacity)
 	{
 		T* TempData = InternalAllocateElements(InCapacity);
@@ -1018,11 +1022,11 @@ private:
 		InternalDestructRange(Data, Data + Size);
 		InternalReleaseData();
 
-		Data		= TempData;
-		Capacity	= InCapacity;
+		Data = TempData;
+		Capacity = InCapacity;
 	}
 
-	FORCEINLINE void InternalEmplaceRealloc(SizeType InCapacity, const T* EmplacePos, SizeType Count)
+	FORCEINLINE void InternalEmplaceRealloc(SizeType InCapacity, T* EmplacePos, SizeType Count)
 	{
 		VALIDATE(InCapacity >= Size + Count);
 
@@ -1037,8 +1041,8 @@ private:
 		InternalDestructRange(Data, Data + Size);
 		InternalReleaseData();
 
-		Data		= TempData;
-		Capacity	= InCapacity;
+		Data = TempData;
+		Capacity = InCapacity;
 	}
 
 	// Construct
@@ -1051,7 +1055,7 @@ private:
 			InternalDefaultConstructRange(Data, Data + Size);
 		}
 	}
-	
+
 	FORCEINLINE void InternalConstruct(SizeType InSize, const T& Value)
 	{
 		if (InSize > 0)
@@ -1072,8 +1076,8 @@ private:
 			Size = Distance;
 		}
 	}
-	
-	FORCEINLINE void InternalConstruct(const T* InBegin, const T* InEnd)
+
+	FORCEINLINE void InternalConstruct(T* InBegin, T* InEnd)
 	{
 		const SizeType Distance = InternalDistance(InBegin, InEnd);
 		if (Distance > 0)
@@ -1101,8 +1105,8 @@ private:
 		// This function assumes that there is no overlap
 		if constexpr (std::is_trivially_copy_constructible<T>())
 		{
-			const SizeType Count 	= InternalDistance(InBegin, InEnd);
-			const SizeType CpySize 	= Count * sizeof(T);
+			const SizeType Count = InternalDistance(InBegin, InEnd);
+			const SizeType CpySize = Count * sizeof(T);
 			memcpy(Dest, InBegin, CpySize);
 		}
 		else
@@ -1126,13 +1130,13 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalMoveEmplace(const T* InBegin, const T* InEnd, T* Dest)
+	FORCEINLINE void InternalMoveEmplace(T* InBegin, T* InEnd, T* Dest)
 	{
 		// This function assumes that there is no overlap
 		if constexpr (std::is_trivially_move_constructible<T>())
 		{
-			const SizeType Count 	= InternalDistance(InBegin, InEnd);
-			const SizeType CpySize 	= Count * sizeof(T);
+			const SizeType Count = InternalDistance(InBegin, InEnd);
+			const SizeType CpySize = Count * sizeof(T);
 			memcpy(Dest, InBegin, CpySize);
 		}
 		else
@@ -1146,7 +1150,7 @@ private:
 		}
 	}
 
-	FORCEINLINE void InternalMemmoveBackwards(const T* InBegin, const T* InEnd, T* Dest)
+	FORCEINLINE void InternalMemmoveBackwards(T* InBegin, T* InEnd, T* Dest)
 	{
 		VALIDATE(InBegin <= InEnd);
 		if (InBegin == InEnd)
@@ -1175,14 +1179,14 @@ private:
 				{
 					(*Dest) = (*InBegin);
 				}
-				
+
 				Dest++;
 				InBegin++;
 			}
 		}
 	}
 
-	FORCEINLINE void InternalMemmoveForward(const T* InBegin, const T* InEnd, T* Dest)
+	FORCEINLINE void InternalMemmoveForward(T* InBegin, T* InEnd, T* Dest)
 	{
 		// Move each object in the range to the destination, starts in the "End" and moves forward
 		const SizeType Count = InternalDistance(InBegin, InEnd);
@@ -1190,8 +1194,8 @@ private:
 		{
 			if (Count > 0)
 			{
-				const SizeType CpySize		= Count * sizeof(T);
-				const SizeType OffsetSize	= (Count - 1) * sizeof(T);
+				const SizeType CpySize = Count * sizeof(T);
+				const SizeType OffsetSize = (Count - 1) * sizeof(T);
 				memmove(reinterpret_cast<Char*>(Dest) - OffsetSize, InBegin, CpySize);
 			}
 		}
