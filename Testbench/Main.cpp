@@ -85,7 +85,7 @@ void BenchMark()
 	// Insert
 #if 1
 	{
-		const Uint32 Iterations = 1000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -130,7 +130,7 @@ void BenchMark()
 #if 1
 	// Emplace
 	{
-		const Uint32 Iterations = 1000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -264,7 +264,7 @@ void BenchMark()
 	// Insert
 #if 1
 	{
-		const Uint32 Iterations = 1000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
@@ -308,7 +308,7 @@ void BenchMark()
 #if 1
 	// Emplace
 	{
-		const Uint32 Iterations = 1000;
+		const Uint32 Iterations = 10000;
 		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
 			Uint64 Total = 0;
