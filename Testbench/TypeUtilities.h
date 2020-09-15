@@ -15,6 +15,8 @@ typedef unsigned int		Uint32;
 typedef unsigned long long	Uint64;
 typedef int					Int32;
 typedef char				Char;
+typedef Char				Byte;
+typedef void* 				VoidPtr;
 
 // Removes reference retrives the types
 template<typename T>

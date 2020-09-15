@@ -13,6 +13,7 @@
 #include "TArray.h"
 #include "TSharedPtr.h"
 #include "TUniquePtr.h"
+#include "TFunction.h"
 
 struct Vec3
 {
@@ -72,6 +73,21 @@ void PrintArr(const std::vector<T>& Arr, const std::string& Name = "")
 	std::cout << "Capacity: " << Arr.capacity() << std::endl;
 
 	std::cout << "--------------------------------" << std::endl << std::endl;
+}
+
+struct A
+{
+	bool Func(Int32 In)
+	{
+		std::cout << "MemberCall " << In << std::endl;
+		return true;
+	}
+};
+
+static bool Func(Int32 In)
+{
+	std::cout << "FunctionCall " << In << std::endl;
+	return true;
 }
 
 #define PrintArr(Arr) PrintArr(Arr, #Arr)
@@ -446,7 +462,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// TArray
-#if 1
+#if 0
 	{
 		std::string ArgvStr = Argv[0];
 
@@ -995,7 +1011,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 1
+#if 0
 	// TSharedPtr
 	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
 
@@ -1026,13 +1042,16 @@ int main(int Argc, const char* Argv[])
 	TWeakPtr<Base> WeakBase0 = BasePtr0;
 	TWeakPtr<Derived> WeakBase1 = DerivedPtr0;
 
-	TSharedPtr<Uint32> UintArr0 = TSharedPtr<Uint32>(new Uint32[5]);
-	TWeakPtr<Uint32> WeakArr = UintArr0;
-	TSharedPtr<Uint32> UintArr1 = WeakArr.MakeShared();
+	std::cout << "Testing Array types" << std::endl;
+	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32>(5);
+	TWeakPtr<Uint32[]> WeakArr = UintArr0;
+	TSharedPtr<Uint32[]> UintArr1 = WeakArr.MakeShared();
 
 	TUniquePtr<Uint32> UniqueInt = MakeUnique<Uint32>(5);
 	TSharedPtr<Uint32> UintPtr3 = TSharedPtr<Uint32>(Move(UniqueInt));
 
+	TUniquePtr<Uint32[]> UniqueUintArr = MakeUnique<Uint32>(5);
+	
 	std::cout << "Testing Index operator" << std::endl;
 	WeakArr[0] = 5;
 	WeakArr[1] = 6;
@@ -1043,14 +1062,21 @@ int main(int Argc, const char* Argv[])
 	std::cout << std::boolalpha << (WeakBase0 == WeakBase1) << std::endl;
 	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
 #endif
-
+	
 #if 1
+	TFunction<bool(int)> NormalFunc = Func;
+	NormalFunc(5);
+	
+	A a;
+	TFunction<bool(int)> MemberFunc = TFunction<bool(int)>(&a, &A::Func);
+	MemberFunc(10);
+	
+#endif
+
+#if 0
 	//Performance
 	BenchMark();
 #endif
-
-	std::vector<Vec3> a;
-	a.emplace(a.begin(), 1.0, 1.0, 1.0);
 
 	return 0;
 }
