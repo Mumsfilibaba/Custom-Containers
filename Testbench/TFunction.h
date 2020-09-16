@@ -10,12 +10,16 @@ template<typename TReturn, typename... TArgs>
 class TFunction<TReturn(TArgs...)>
 {
 private:
-    // Handles the basecase
+    // Base
     class IFunction
     {
     public:
 		virtual ~IFunction() = default;
-        virtual TReturn Execute(TArgs... Args) noexcept = 0;
+        
+		virtual TReturn Invoke(TArgs... Args) noexcept = 0;
+		
+		virtual IFunction* Clone(VoidPtr Memory) noexcept = 0;
+		virtual IFunction* Move(VoidPtr Memory) noexcept = 0;
     };
 	
     // Member functions
@@ -32,11 +36,37 @@ private:
 			, This(InThis)
         {
         }
+		
+		inline MemberFunction(const MemberFunction& Other)
+			: IFunction()
+			, Func(Other.Func)
+			, This(Other.This)
+		{
+		}
+		
+		inline MemberFunction(MemberFunction&& Other) noexcept
+			: IFunction()
+			, Func(::Move(Other.Func))
+			, This(::Move(Other.This))
+		{
+			Other.Func = nullptr;
+			Other.This = nullptr;
+		}
 
-        inline virtual TReturn Execute(TArgs... Args) noexcept override final
+        inline virtual TReturn Invoke(TArgs... Args) noexcept override final
         {
 			return ((*This).*Func)(Forward<TArgs>(Args)...);
         }
+		
+		inline virtual IFunction* Clone(VoidPtr Memory) noexcept override final
+		{
+			return new(Memory) MemberFunction(*this);
+		}
+		
+		inline virtual IFunction* Move(VoidPtr Memory) noexcept override final
+		{
+			return new(Memory) MemberFunction(::Move(*this));
+		}
 
     private:
         FunctionType Func;
@@ -49,14 +79,41 @@ private:
 	{
 	public:
         inline GenericFunctor(const F& InFunctor) noexcept
-            : Functor(InFunctor)
+            : IFunction()
+			, Functor(InFunctor)
         {
         }
+		
+        inline GenericFunctor(const GenericFunctor& Other) noexcept
+			: IFunction()
+			, Functor(Other.Functor)
+        {
+        }
+		
+        inline GenericFunctor(GenericFunctor&& Other) noexcept
+			: IFunction()
+			, Functor(::Move(Other.Functor))
+        {
+			if constexpr (std::is_pointer<F>())
+			{
+				Other.Functor = nullptr;
+			}
+        }
 
-        inline virtual TReturn Execute(TArgs... Args) noexcept override final
+        inline virtual TReturn Invoke(TArgs... Args) noexcept override final
         {
 			return Functor(Forward<TArgs>(Args)...);
         }
+		
+		inline virtual IFunction* Clone(VoidPtr Memory) noexcept override final
+		{
+			return new(Memory) GenericFunctor(*this);
+		}
+		
+		inline virtual IFunction* Move(VoidPtr Memory) noexcept override final
+		{
+			return new(Memory) GenericFunctor(::Move(*this));
+		}
 		
 	private:
 		F Functor;
@@ -67,14 +124,12 @@ public:
 		: StackBuffer()
 		, Func(nullptr)
 	{
-		memset(StackBuffer, 0, sizeof(StackBuffer));
 	}
 	
 	inline TFunction(std::nullptr_t) noexcept
 		: StackBuffer()
 		, Func(nullptr)
 	{
-		memset(StackBuffer, 0, sizeof(StackBuffer));
 	}
 	
 	template<typename F>
@@ -84,9 +139,9 @@ public:
     {
 		constexpr Uint32 StackSize = sizeof(StackBuffer);
 		constexpr Uint32 FunctorSize = sizeof(GenericFunctor<F>);
-		
-		VALIDATE(FunctorSize <= StackSize);
-		
+		static_assert(FunctorSize <= StackSize, "Functor is too big for TFunction");
+		static_assert(std::is_invocable<F, TArgs...>());
+
         new(reinterpret_cast<VoidPtr>(StackBuffer)) GenericFunctor<F>(Functor);
         Func = reinterpret_cast<IFunction*>(StackBuffer);
     }
@@ -96,10 +151,9 @@ public:
         : StackBuffer()
         , Func(nullptr)
     {
-		constexpr Uint32 StackSize 	= sizeof(StackBuffer);
-		constexpr Uint32 FuncSize 	= sizeof(MemberFunction<T>);
-		
-		VALIDATE(FuncSize <= StackSize);
+		constexpr Uint32 StackSize = sizeof(StackBuffer);
+		constexpr Uint32 FuncSize = sizeof(MemberFunction<T>);
+		static_assert(FuncSize <= StackSize, "Functor is too big for TFunction");
 		
         new(reinterpret_cast<VoidPtr>(StackBuffer)) MemberFunction<T>(This, MemberFunc);
         Func = reinterpret_cast<IFunction*>(StackBuffer);
@@ -109,19 +163,21 @@ public:
 		: StackBuffer()
 		, Func(nullptr)
 	{
-		memcpy(StackBuffer, Other.StackBuffer, sizeof(StackBuffer));
-		Func = reinterpret_cast<IFunction*>(StackBuffer);
+		if (Other.Func)
+		{
+			Func = Other.Func->Clone(reinterpret_cast<VoidPtr>(StackBuffer));
+		}
 	}
 	
 	inline TFunction(TFunction&& Other) noexcept
 		: StackBuffer()
 		, Func(nullptr)
 	{
-		memcpy(StackBuffer, Other.StackBuffer, sizeof(StackBuffer));
-		Func = reinterpret_cast<IFunction*>(StackBuffer);
-		
-		memset(Other.StackBuffer, 0, sizeof(StackBuffer));
-		Other.Func = nullptr;
+		if (Other.Func)
+		{
+			Func = Other.Func->Move(reinterpret_cast<VoidPtr>(StackBuffer));
+			Other.Func = nullptr;
+		}
 	}
 	
 	inline ~TFunction()
@@ -131,24 +187,19 @@ public:
 	
 	void Swap(TFunction& Other)
 	{
-		Byte TempBuffer[56];
-		memcpy(TempBuffer, StackBuffer, sizeof(StackBuffer));
-		
-		memcpy(StackBuffer, Other.StackBuffer, sizeof(StackBuffer));
-		Func = reinterpret_cast<IFunction*>(StackBuffer);
-		
-		memcpy(Other.StackBuffer, TempBuffer, sizeof(StackBuffer));
-		Other.Func = reinterpret_cast<IFunction*>(Other.StackBuffer);
+		TFunction TempFunc(*this);
+		*this = Other;
+		Other = TempFunc;
 	}
 	
 	template<typename F>
 	void Assign(F&& Functor)
-	{		
+	{
 		constexpr Uint32 StackSize = sizeof(StackBuffer);
 		constexpr Uint32 FunctorSize = sizeof(GenericFunctor<F>);
+		static_assert(FunctorSize <= StackSize, "Functor is too big for TFunction");
+		static_assert(std::is_invocable<F, TArgs...>());
 		
-		VALIDATE(FunctorSize <= StackSize);
-
 		InternalRelease();
 		
         new(reinterpret_cast<VoidPtr>(StackBuffer)) GenericFunctor<F>(Functor);
@@ -160,24 +211,23 @@ public:
 	{
 		constexpr Uint32 StackSize 	= sizeof(StackBuffer);
 		constexpr Uint32 FuncSize 	= sizeof(MemberFunction<T>);
-		
-		VALIDATE(FuncSize <= StackSize);
-		
+        static_assert(FuncSize <= StackSize, "Functor is too big for TFunction");
+
 		InternalRelease();
 		
 		new(reinterpret_cast<VoidPtr>(StackBuffer)) MemberFunction<T>(This, MemberFunc);
 		Func = reinterpret_cast<IFunction*>(StackBuffer);
 	}
 	
-	TReturn Call(TArgs... Args) noexcept
+	TReturn Invoke(TArgs... Args) noexcept
 	{
 		VALIDATE(Func != nullptr);
-		return Func->Execute(Forward<TArgs>(Args)...);
+		return Func->Invoke(Forward<TArgs>(Args)...);
 	}
 	
 	TReturn operator()(TArgs... Args) noexcept
 	{
-		return Call(Forward<TArgs>(Args)...);
+		return Invoke(Forward<TArgs>(Args)...);
 	}
 
 	explicit operator bool() const noexcept
@@ -190,9 +240,10 @@ public:
 		if (this != &Other)
 		{
 			InternalRelease();
-			
-			memcpy(StackBuffer, Other.StackBuffer, sizeof(StackBuffer));
-			Func = reinterpret_cast<IFunction*>(StackBuffer);
+			if (Other.Func)
+			{
+				Func = Other.Func->Clone(reinterpret_cast<VoidPtr>(StackBuffer));
+			}
 		}
 		
 		return *this;
@@ -203,13 +254,19 @@ public:
 		if (this != &Other)
 		{
 			InternalRelease();
-			
-			memcpy(StackBuffer, Other.StackBuffer, sizeof(StackBuffer));
-			Func = reinterpret_cast<IFunction*>(StackBuffer);
-			
-			memset(Other.StackBuffer, 0, sizeof(StackBuffer));
+			if (Other.Func)
+			{
+				Func = Other.Func->Move(reinterpret_cast<VoidPtr>(StackBuffer));
+				Other.Func = nullptr;
+			}
 		}
 		
+		return *this;
+	}
+	
+	TFunction& operator=(std::nullptr_t) noexcept
+	{
+		InternalRelease();
 		return *this;
 	}
 	
@@ -219,6 +276,7 @@ private:
 		if (Func)
 		{
 			Func->~IFunction();
+			Func = nullptr;
 		}
 	}
 	
