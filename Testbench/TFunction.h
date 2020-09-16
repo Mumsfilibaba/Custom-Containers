@@ -17,27 +17,6 @@ private:
 		virtual ~IFunction() = default;
         virtual TReturn Execute(TArgs... Args) noexcept = 0;
     };
-
-    // Functions
-    class Function : public IFunction
-    {
-    public:
-        typedef TReturn(*FunctionType)(TArgs...);
-
-        inline Function(FunctionType InFunc) noexcept
-            : IFunction()
-            , Func(InFunc)
-        {
-        }
-
-        inline virtual TReturn Execute(TArgs... Args) noexcept override final
-        {
-            return Func(Forward<TArgs>(Args)...);
-        }
-
-    private:
-        FunctionType Func;
-    };
 	
     // Member functions
 	template<typename T>
@@ -78,6 +57,7 @@ private:
         {
 			return Functor(Forward<TArgs>(Args)...);
         }
+		
 	private:
 		F Functor;
 	};
@@ -97,16 +77,17 @@ public:
 		memset(StackBuffer, 0, sizeof(StackBuffer));
 	}
 	
-    inline TFunction(TReturn(*InFunc)(TArgs...)) noexcept
+	template<typename F>
+    inline TFunction(F Functor) noexcept
         : StackBuffer()
         , Func(nullptr)
     {
-		constexpr Uint32 StackSize 	= sizeof(StackBuffer);
-		constexpr Uint32 FuncSize 	= sizeof(Function);
+		constexpr Uint32 StackSize = sizeof(StackBuffer);
+		constexpr Uint32 FunctorSize = sizeof(GenericFunctor<F>);
 		
-		VALIDATE(FuncSize <= StackSize);
+		VALIDATE(FunctorSize <= StackSize);
 		
-        new(reinterpret_cast<VoidPtr>(StackBuffer)) Function(InFunc);
+        new(reinterpret_cast<VoidPtr>(StackBuffer)) GenericFunctor<F>(Functor);
         Func = reinterpret_cast<IFunction*>(StackBuffer);
     }
 	
@@ -140,6 +121,7 @@ public:
 		Func = reinterpret_cast<IFunction*>(StackBuffer);
 		
 		memset(Other.StackBuffer, 0, sizeof(StackBuffer));
+		Other.Func = nullptr;
 	}
 	
 	inline ~TFunction()
@@ -160,9 +142,31 @@ public:
 	}
 	
 	template<typename F>
-	void Assign(F&& InF)
-	{
+	void Assign(F&& Functor)
+	{		
+		constexpr Uint32 StackSize = sizeof(StackBuffer);
+		constexpr Uint32 FunctorSize = sizeof(GenericFunctor<F>);
+		
+		VALIDATE(FunctorSize <= StackSize);
+
 		InternalRelease();
+		
+        new(reinterpret_cast<VoidPtr>(StackBuffer)) GenericFunctor<F>(Functor);
+        Func = reinterpret_cast<IFunction*>(StackBuffer);
+	}
+	
+	template<typename T>
+	void Assign(T* This, TReturn(T::*MemberFunc)(TArgs...))
+	{
+		constexpr Uint32 StackSize 	= sizeof(StackBuffer);
+		constexpr Uint32 FuncSize 	= sizeof(MemberFunction<T>);
+		
+		VALIDATE(FuncSize <= StackSize);
+		
+		InternalRelease();
+		
+		new(reinterpret_cast<VoidPtr>(StackBuffer)) MemberFunction<T>(This, MemberFunc);
+		Func = reinterpret_cast<IFunction*>(StackBuffer);
 	}
 	
 	TReturn Call(TArgs... Args) noexcept

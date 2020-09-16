@@ -1064,13 +1064,35 @@ int main(int Argc, const char* Argv[])
 #endif
 	
 #if 1
-	TFunction<bool(int)> NormalFunc = Func;
+	struct Functor
+	{
+		bool operator()(Int32 In)
+		{
+			std::cout << "Functor " << In << std::endl;
+			return true;
+		}
+	} Fun;
+	
+	TFunction<bool(Int32)> NormalFunc = Func;
 	NormalFunc(5);
+	std::cout << "Sizeof NormalFunc " << sizeof(NormalFunc) << std::endl;
 	
 	A a;
-	TFunction<bool(int)> MemberFunc = TFunction<bool(int)>(&a, &A::Func);
+	TFunction<bool(Int32)> MemberFunc = TFunction<bool(Int32)>(&a, &A::Func);
 	MemberFunc(10);
+	std::cout << "Sizeof MemberFunc " << sizeof(MemberFunc) << std::endl;
 	
+	TFunction<bool(Int32)> FunctorFunc = Fun;
+	FunctorFunc(15);
+	std::cout << "Sizeof FunctorFunc " << sizeof(FunctorFunc) << std::endl;
+	
+	TFunction<bool(Int32)> LambdaFunc = [](Int32 Input) -> bool
+	{
+		std::cout << "Lambda " << Input << std::endl;
+		return true;
+	};
+	
+	LambdaFunc(20);
 #endif
 
 #if 0
