@@ -52,8 +52,8 @@ void PrintArr(const TArray<T>& Arr, const std::string& Name = "")
 		std::cout << (std::string)i << std::endl;
 	}
 
-	std::cout << "Size: " << Arr.GetSize() << std::endl;
-	std::cout << "Capacity: " << Arr.GetCapacity() << std::endl;
+	std::cout << "Size: " << Arr.Size() << std::endl;
+	std::cout << "Capacity: " << Arr.Capacity() << std::endl;
 
 	std::cout << "--------------------------------" << std::endl << std::endl;
 }
@@ -143,7 +143,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Strings1.Insert(Strings1.begin(), "My name is jeff");
+					Strings1.Insert(Strings1.Begin(), "My name is jeff");
 				}
 				auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -321,7 +321,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Vectors1.Insert(Vectors1.begin(), Vec3(3.0, 5.0, -6.0));
+					Vectors1.Insert(Vectors1.Begin(), Vec3(3.0, 5.0, -6.0));
 				}
 				auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -365,7 +365,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Vectors1.Emplace(Vectors1.begin(), double(J + 1), 5.0, -6.0);
+					Vectors1.Emplace(Vectors1.Begin(), double(J + 1), 5.0, -6.0);
 				}
 
 				auto t2 = std::chrono::high_resolution_clock::now();
@@ -766,14 +766,15 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 0
+	// TArray<vec3>
+#if 1
 	{
 		std::cout << "Testing TArray<Vec3>" << std::endl;
 		std::cout << std::endl << "Testing Constructors" << std::endl;
 		// Test constructors
 		TArray<Vec3> Vectors0;
 		TArray<Vec3> Vectors1(5, Vec3(1.0, 1.0, 1.0));
-		TArray<Vec3> Vectors2(Vectors1.Begin(), Vectors1.End());
+		TArray<Vec3> Vectors2(Vectors1.begin(), Vectors1.end());
 		TArray<Vec3> Vectors3 =
 		{
 			Vec3(1.0, 1.0, 1.0),
@@ -813,7 +814,7 @@ int main(int Argc, const char* Argv[])
 		Vectors1.Assign({ Vec3(1.0, 5.0, 5.0), Vec3(2.0, 5.0, 5.0), Vec3(3.0, 5.0, 5.0) });
 		PrintArr(Vectors1);
 
-		Vectors2.Assign(Vectors3.Begin(), Vectors3.End());
+		Vectors2.Assign(Vectors3.begin(), Vectors3.end());
 		PrintArr(Vectors2);
 
 		// Resize
@@ -850,7 +851,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Vectors4);
 
 		std::cout << "After Reserve" << std::endl << std::endl;
-		Vectors4.Reserve(Vectors4.GetCapacity());
+		Vectors4.Reserve(Vectors4.Capacity());
 		PrintArr(Vectors4);
 
 		std::cout << "Shrinking" << std::endl << std::endl;
@@ -862,7 +863,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Vectors4);
 
 		std::cout << "Resize" << std::endl << std::endl;
-		Vectors4.Resize(Vectors4.GetCapacity() - 2, Vec3(-1.0f, -1.0f, -1.0f));
+		Vectors4.Resize(Vectors4.Capacity() - 2, Vec3(-1.0f, -1.0f, -1.0f));
 		PrintArr(Vectors4);
 
 		// Shrink To Fit
@@ -1027,6 +1028,7 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
+	// Smart Pointers
 #if 0
 	// TSharedPtr
 	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
@@ -1079,7 +1081,8 @@ int main(int Argc, const char* Argv[])
 	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
 #endif
 	
-#if 1
+	// TFunction
+#if 0
 	std::cout << std::endl << "----------TFunction----------" << std::endl << std::endl;
 	std::cout << "Testing constructors" << std::endl;
 	
