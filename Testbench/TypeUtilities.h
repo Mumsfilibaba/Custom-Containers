@@ -3,6 +3,8 @@
 
 #define VALIDATE(Condition)	assert((Condition))
 
+#define UNREFERENCED_VARIABLE(Variable) ((void)(Variable))
+
 #if	defined(_WIN32)
 	#define FORCEINLINE	__forceinline
 #elif defined(__APPLE__)
@@ -23,21 +25,18 @@ template<typename T>
 struct _TRemoveReference
 {
 	using TType = T;
-	using TConstRefType = const T;
 };
 
 template<typename T>
 struct _TRemoveReference<T&>
 {
 	using TType = T;
-	using TConstRefType = const T&;
 };
 
 template<typename T>
 struct _TRemoveReference<T&&>
 {
 	using TType = T;
-	using TConstRefType = const T&&;
 };
 
 template<typename T>

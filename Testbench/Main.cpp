@@ -469,12 +469,16 @@ void BenchMark()
 
 int main(int Argc, const char* Argv[])
 {
+	UNREFERENCED_VARIABLE(Argc);
+	UNREFERENCED_VARIABLE(Argv);
+
 #ifdef _WIN32
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
 	// TArray
 #if 0
+	std::cout << std::endl << "----------TArray----------" << std::endl << std::endl;
 	{
 		std::string ArgvStr = Argv[0];
 
@@ -1025,7 +1029,7 @@ int main(int Argc, const char* Argv[])
 
 #if 0
 	// TSharedPtr
-	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
+	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
 
 	struct Base
 	{
@@ -1076,6 +1080,7 @@ int main(int Argc, const char* Argv[])
 #endif
 	
 #if 1
+	std::cout << std::endl << "----------TFunction----------" << std::endl << std::endl;
 	std::cout << "Testing constructors" << std::endl;
 	
 	struct Functor
@@ -1134,7 +1139,6 @@ int main(int Argc, const char* Argv[])
 	
 	NormalFunc(90);
 	MemberFunc(100);
-	
 #endif
 
 #if 0
