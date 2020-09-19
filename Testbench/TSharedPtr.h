@@ -9,6 +9,12 @@ struct PtrControlBlock
 public:
 	typedef Uint32 RefType;
 
+	inline PtrControlBlock()
+		: WeakReferences(0)
+		, StrongReferences(0)
+	{
+	}
+
 	FORCEINLINE RefType AddWeakRef() noexcept
 	{
 		return WeakReferences++;
@@ -125,6 +131,7 @@ protected:
 		, Counter(nullptr)
 	{
 		static_assert(std::is_array_v<T> == std::is_array_v<D>, "Scalar types must have scalar TDelete");
+		static_assert(std::is_invocable<D, T*>(), "TDelete must be a callable");
 	}
 
 	FORCEINLINE void InternalAddStrongRef() noexcept
@@ -163,7 +170,7 @@ protected:
 					delete Counter;
 				}
 				
-				delete Ptr;
+				Deleter(Ptr);
 				InternalClear();
 			}
 		}
@@ -307,6 +314,7 @@ protected:
 
 	T* Ptr;
 	PtrControlBlock* Counter;
+	D Deleter;
 };
 
 /*
