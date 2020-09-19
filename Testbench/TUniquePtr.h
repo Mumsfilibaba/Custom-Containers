@@ -315,20 +315,21 @@ private:
 	T* Ptr;
 };
 
-
 /*
 * Creates a new object together with a UniquePtr
 */
 template<typename T, typename... TArgs>
-TUniquePtr<T> MakeUnique(TArgs&&... Args) noexcept
+std::enable_if_t<!std::is_array_v<T>, TUniquePtr<T>> MakeUnique(TArgs&&... Args) noexcept
 {
 	T* UniquePtr = new T(Forward<TArgs>(Args)...);
 	return Move(TUniquePtr<T>(UniquePtr));
 }
 
 template<typename T>
-TUniquePtr<T[]> MakeUnique(Uint32 Size) noexcept
+std::enable_if_t<std::is_array_v<T>, TUniquePtr<T>> MakeUnique(Uint32 Size) noexcept
 {
-	T* UniquePtr = new T[Size];
-	return Move(TUniquePtr<T[]>(UniquePtr));
+	using TType = TRemoveExtent<T>;
+
+	TType* UniquePtr = new TType[Size];
+	return Move(TUniquePtr<T>(UniquePtr));
 }

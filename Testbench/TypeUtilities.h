@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <type_traits>
 
 #define VALIDATE(Condition)	assert((Condition))
 
@@ -41,6 +42,28 @@ struct _TRemoveReference<T&&>
 
 template<typename T>
 using TRemoveReference = typename _TRemoveReference<T>::TType;
+
+// Removes array type
+template<typename T>
+struct _TRemoveExtent
+{
+	using TType = T;
+};
+
+template<typename T>
+struct _TRemoveExtent<T[]>
+{
+	using TType = T;
+};
+
+template<typename T, size_t SIZE>
+struct _TRemoveExtent<T[SIZE]>
+{
+	using TType = T;
+};
+
+template<typename T>
+using TRemoveExtent = typename _TRemoveExtent<T>::TType;
 
 // Move an object by converting it into a rvalue
 template<typename T>

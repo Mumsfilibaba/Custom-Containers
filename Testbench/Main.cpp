@@ -10,6 +10,8 @@
 	#include <crtdbg.h>
 #endif
 
+#include <type_traits>
+
 #include "TArray.h"
 #include "TSharedPtr.h"
 #include "TUniquePtr.h"
@@ -475,7 +477,6 @@ int main(int Argc, const char* Argv[])
 #ifdef _WIN32
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
 	// TArray
 #if 0
 	std::cout << std::endl << "----------TArray----------" << std::endl << std::endl;
@@ -1029,7 +1030,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// Smart Pointers
-#if 0
+#if 1
 	// TSharedPtr
 	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
 
@@ -1061,14 +1062,14 @@ int main(int Argc, const char* Argv[])
 	TWeakPtr<Derived> WeakBase1 = DerivedPtr0;
 
 	std::cout << "Testing Array types" << std::endl;
-	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32>(5);
+	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32[]>(5);
 	TWeakPtr<Uint32[]> WeakArr = UintArr0;
 	TSharedPtr<Uint32[]> UintArr1 = WeakArr.MakeShared();
 
 	TUniquePtr<Uint32> UniqueInt = MakeUnique<Uint32>(5);
 	TSharedPtr<Uint32> UintPtr3 = TSharedPtr<Uint32>(Move(UniqueInt));
 
-	TUniquePtr<Uint32[]> UniqueUintArr = MakeUnique<Uint32>(5);
+	TUniquePtr<Uint32[]> UniqueUintArr = MakeUnique<Uint32[]>(5);
 	
 	std::cout << "Testing Index operator" << std::endl;
 	WeakArr[0] = 5;
@@ -1082,7 +1083,7 @@ int main(int Argc, const char* Argv[])
 #endif
 	
 	// TFunction
-#if 0
+#if 1
 	std::cout << std::endl << "----------TFunction----------" << std::endl << std::endl;
 	std::cout << "Testing constructors" << std::endl;
 	
