@@ -10,6 +10,8 @@
 	#include <crtdbg.h>
 #endif
 
+#include <type_traits>
+
 #include "TArray.h"
 #include "TSharedPtr.h"
 #include "TUniquePtr.h"
@@ -52,8 +54,8 @@ void PrintArr(const TArray<T>& Arr, const std::string& Name = "")
 		std::cout << (std::string)i << std::endl;
 	}
 
-	std::cout << "Size: " << Arr.GetSize() << std::endl;
-	std::cout << "Capacity: " << Arr.GetCapacity() << std::endl;
+	std::cout << "Size: " << Arr.Size() << std::endl;
+	std::cout << "Capacity: " << Arr.Capacity() << std::endl;
 
 	std::cout << "--------------------------------" << std::endl << std::endl;
 }
@@ -143,7 +145,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Strings1.Insert(Strings1.begin(), "My name is jeff");
+					Strings1.Insert(Strings1.Begin(), "My name is jeff");
 				}
 				auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -321,7 +323,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Vectors1.Insert(Vectors1.begin(), Vec3(3.0, 5.0, -6.0));
+					Vectors1.Insert(Vectors1.Begin(), Vec3(3.0, 5.0, -6.0));
 				}
 				auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -365,7 +367,7 @@ void BenchMark()
 				auto t1 = std::chrono::high_resolution_clock::now();
 				for (Uint32 J = 0; J < Iterations; J++)
 				{
-					Vectors1.Emplace(Vectors1.begin(), double(J + 1), 5.0, -6.0);
+					Vectors1.Emplace(Vectors1.Begin(), double(J + 1), 5.0, -6.0);
 				}
 
 				auto t2 = std::chrono::high_resolution_clock::now();
@@ -469,12 +471,15 @@ void BenchMark()
 
 int main(int Argc, const char* Argv[])
 {
+	UNREFERENCED_VARIABLE(Argc);
+	UNREFERENCED_VARIABLE(Argv);
+
 #ifdef _WIN32
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-
 	// TArray
 #if 0
+	std::cout << std::endl << "----------TArray----------" << std::endl << std::endl;
 	{
 		std::string ArgvStr = Argv[0];
 
@@ -762,14 +767,15 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 0
+	// TArray<vec3>
+#if 1
 	{
 		std::cout << "Testing TArray<Vec3>" << std::endl;
 		std::cout << std::endl << "Testing Constructors" << std::endl;
 		// Test constructors
 		TArray<Vec3> Vectors0;
 		TArray<Vec3> Vectors1(5, Vec3(1.0, 1.0, 1.0));
-		TArray<Vec3> Vectors2(Vectors1.Begin(), Vectors1.End());
+		TArray<Vec3> Vectors2(Vectors1.begin(), Vectors1.end());
 		TArray<Vec3> Vectors3 =
 		{
 			Vec3(1.0, 1.0, 1.0),
@@ -809,7 +815,7 @@ int main(int Argc, const char* Argv[])
 		Vectors1.Assign({ Vec3(1.0, 5.0, 5.0), Vec3(2.0, 5.0, 5.0), Vec3(3.0, 5.0, 5.0) });
 		PrintArr(Vectors1);
 
-		Vectors2.Assign(Vectors3.Begin(), Vectors3.End());
+		Vectors2.Assign(Vectors3.begin(), Vectors3.end());
 		PrintArr(Vectors2);
 
 		// Resize
@@ -846,7 +852,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Vectors4);
 
 		std::cout << "After Reserve" << std::endl << std::endl;
-		Vectors4.Reserve(Vectors4.GetCapacity());
+		Vectors4.Reserve(Vectors4.Capacity());
 		PrintArr(Vectors4);
 
 		std::cout << "Shrinking" << std::endl << std::endl;
@@ -858,7 +864,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Vectors4);
 
 		std::cout << "Resize" << std::endl << std::endl;
-		Vectors4.Resize(Vectors4.GetCapacity() - 2, Vec3(-1.0f, -1.0f, -1.0f));
+		Vectors4.Resize(Vectors4.Capacity() - 2, Vec3(-1.0f, -1.0f, -1.0f));
 		PrintArr(Vectors4);
 
 		// Shrink To Fit
@@ -1023,9 +1029,10 @@ int main(int Argc, const char* Argv[])
 	}
 #endif
 
-#if 0
+	// Smart Pointers
+#if 1
 	// TSharedPtr
-	std::cout << std::endl << "Testing TSharedPtr" << std::endl << std::endl;
+	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
 
 	struct Base
 	{
@@ -1055,14 +1062,14 @@ int main(int Argc, const char* Argv[])
 	TWeakPtr<Derived> WeakBase1 = DerivedPtr0;
 
 	std::cout << "Testing Array types" << std::endl;
-	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32>(5);
+	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32[]>(5);
 	TWeakPtr<Uint32[]> WeakArr = UintArr0;
 	TSharedPtr<Uint32[]> UintArr1 = WeakArr.MakeShared();
 
 	TUniquePtr<Uint32> UniqueInt = MakeUnique<Uint32>(5);
 	TSharedPtr<Uint32> UintPtr3 = TSharedPtr<Uint32>(Move(UniqueInt));
 
-	TUniquePtr<Uint32[]> UniqueUintArr = MakeUnique<Uint32>(5);
+	TUniquePtr<Uint32[]> UniqueUintArr = MakeUnique<Uint32[]>(5);
 	
 	std::cout << "Testing Index operator" << std::endl;
 	WeakArr[0] = 5;
@@ -1075,7 +1082,9 @@ int main(int Argc, const char* Argv[])
 	std::cout << std::boolalpha << (UintPtr0 == UintPtr1) << std::endl;
 #endif
 	
+	// TFunction
 #if 1
+	std::cout << std::endl << "----------TFunction----------" << std::endl << std::endl;
 	std::cout << "Testing constructors" << std::endl;
 	
 	struct Functor
@@ -1134,7 +1143,6 @@ int main(int Argc, const char* Argv[])
 	
 	NormalFunc(90);
 	MemberFunc(100);
-	
 #endif
 
 #if 0

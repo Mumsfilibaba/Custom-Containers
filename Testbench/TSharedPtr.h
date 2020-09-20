@@ -9,6 +9,12 @@ struct PtrControlBlock
 public:
 	typedef Uint32 RefType;
 
+	inline PtrControlBlock()
+		: WeakReferences(0)
+		, StrongReferences(0)
+	{
+	}
+
 	FORCEINLINE RefType AddWeakRef() noexcept
 	{
 		return WeakReferences++;
@@ -45,13 +51,38 @@ private:
 };
 
 /*
-* Base class for TWeak- and TSharedPtr
+* TDelete
 */
 template<typename T>
+struct TDelete
+{
+	using TType = T;
+
+	FORCEINLINE void operator()(T* Ptr)
+	{
+		delete Ptr;
+	}
+};
+
+template<typename T>
+struct TDelete<T[]>
+{
+	using TType = TRemoveExtent<T>;
+
+	FORCEINLINE void operator()(T* Ptr)
+	{
+		delete[] Ptr;
+	}
+};
+
+/*
+* Base class for TWeak- and TSharedPtr
+*/
+template<typename T, typename D>
 class TPtrBase
 {
 public:
-	template<typename TOther>
+	template<typename TOther, typename DOther>
 	friend class TPtrBase;
 
 	FORCEINLINE T* Get() const noexcept
@@ -99,6 +130,8 @@ protected:
 		: Ptr(nullptr)
 		, Counter(nullptr)
 	{
+		static_assert(std::is_array_v<T> == std::is_array_v<D>, "Scalar types must have scalar TDelete");
+		static_assert(std::is_invocable<D, T*>(), "TDelete must be a callable");
 	}
 
 	FORCEINLINE void InternalAddStrongRef() noexcept
@@ -137,7 +170,7 @@ protected:
 					delete Counter;
 				}
 				
-				delete Ptr;
+				Deleter(Ptr);
 				InternalClear();
 			}
 		}
@@ -181,8 +214,8 @@ protected:
 		Other.Counter	= nullptr;
 	}
 
-	template<typename TOther>
-	FORCEINLINE void InternalMove(TPtrBase<TOther>&& Other) noexcept
+	template<typename TOther, typename DOther>
+	FORCEINLINE void InternalMove(TPtrBase<TOther, DOther>&& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>());
 
@@ -200,7 +233,7 @@ protected:
 		InternalAddStrongRef();
 	}
 
-	template<typename TOther>
+	template<typename TOther, typename DOther>
 	FORCEINLINE void InternalConstructStrong(TOther* InPtr)
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -217,8 +250,8 @@ protected:
 		InternalAddStrongRef();
 	}
 
-	template<typename TOther>
-	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther>& Other)
+	template<typename TOther, typename DOther>
+	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other)
 	{
 		static_assert(std::is_convertible<TOther, T>());
 
@@ -251,8 +284,8 @@ protected:
 		InternalAddWeakRef();
 	}
 
-	template<typename TOther>
-	FORCEINLINE void InternalConstructWeak(const TPtrBase<TOther>& Other)
+	template<typename TOther, typename DOther>
+	FORCEINLINE void InternalConstructWeak(const TPtrBase<TOther, DOther>& Other)
 	{
 		static_assert(std::is_convertible<TOther, T>());
 
@@ -281,6 +314,7 @@ protected:
 
 	T* Ptr;
 	PtrControlBlock* Counter;
+	D Deleter;
 };
 
 /*
@@ -293,9 +327,9 @@ class TWeakPtr;
 * TSharedPtr - RefCounted Scalar Pointer
 */
 template<typename T>
-class TSharedPtr : public TPtrBase<T>
+class TSharedPtr : public TPtrBase<T, TDelete<T>>
 {
-	using TBase = TPtrBase<T>;
+	using TBase = TPtrBase<T, TDelete<T>>;
 
 public:
 	FORCEINLINE TSharedPtr() noexcept
@@ -363,7 +397,7 @@ public:
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
-		TBase::template InternalConstructStrong<TOther>(Other.Release());
+		TBase::template InternalConstructStrong<TOther, TDelete<T>>(Other.Release());
 	}
 
 	FORCEINLINE ~TSharedPtr()
@@ -489,9 +523,9 @@ public:
 * TSharedPtr - RefCounted Pointer for array types
 */
 template<typename T>
-class TSharedPtr<T[]> : public TPtrBase<T>
+class TSharedPtr<T[]> : public TPtrBase<T, TDelete<T[]>>
 {
-	using TBase = TPtrBase<T>;
+	using TBase = TPtrBase<T, TDelete<T[]>>;
 
 public:
 	FORCEINLINE TSharedPtr() noexcept
@@ -672,9 +706,9 @@ public:
 * TWeakPtr - Weak Pointer for scalar types
 */
 template<typename T>
-class TWeakPtr : public TPtrBase<T>
+class TWeakPtr : public TPtrBase<T, TDelete<T>>
 {
-	using TBase = TPtrBase<T>;
+	using TBase = TPtrBase<T, TDelete<T>>;
 
 public:
 	FORCEINLINE TWeakPtr() noexcept
@@ -853,9 +887,9 @@ public:
 * TWeakPtr - Weak Pointer for scalar types
 */
 template<typename T>
-class TWeakPtr<T[]> : public TPtrBase<T>
+class TWeakPtr<T[]> : public TPtrBase<T, TDelete<T[]>>
 {
-	using TBase = TPtrBase<T>;
+	using TBase = TPtrBase<T, TDelete<T[]>>;
 
 public:
 	FORCEINLINE TWeakPtr() noexcept
@@ -1037,15 +1071,17 @@ public:
 * Creates a new object together with a SharedPtr
 */
 template<typename T, typename... TArgs>
-TSharedPtr<T> MakeShared(TArgs&&... Args) noexcept
+std::enable_if_t<!std::is_array_v<T>, TSharedPtr<T>> MakeShared(TArgs&&... Args) noexcept
 {
 	T* RefCountedPtr = new T(Forward<TArgs>(Args)...);
 	return Move(TSharedPtr<T>(RefCountedPtr));
 }
 
 template<typename T>
-TSharedPtr<T[]> MakeShared(Uint32 Size) noexcept
+std::enable_if_t<std::is_array_v<T>, TSharedPtr<T>> MakeShared(Uint32 Size) noexcept
 {
-	T* RefCountedPtr = new T[Size];
-	return Move(TSharedPtr<T[]>(RefCountedPtr));
+	using TType = TRemoveExtent<T>;
+
+	TType* RefCountedPtr = new TType[Size];
+	return Move(TSharedPtr<T>(RefCountedPtr));
 }
