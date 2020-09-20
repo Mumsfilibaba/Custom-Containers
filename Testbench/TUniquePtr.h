@@ -190,7 +190,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TUniquePtr(TUniquePtr<TOther>&& Other) noexcept
+	FORCEINLINE TUniquePtr(TUniquePtr<TOther[]>&& Other) noexcept
 		: Ptr(Other.Ptr)
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -267,7 +267,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TUniquePtr& operator=(TUniquePtr<TOther>&& Other) noexcept
+	FORCEINLINE TUniquePtr& operator=(TUniquePtr<TOther[]>&& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>());
 		
