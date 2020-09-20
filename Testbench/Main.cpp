@@ -1063,12 +1063,61 @@ int main(int Argc, const char* Argv[])
 	TSharedPtr<Uint32> UintPtr1 = Null;
 	TSharedPtr<Uint32> UintPtr2 = TSharedPtr<Uint32>(Ptr1); // Takes ownership of Ptr1
 
+	std::cout << "Testing casting" << std::endl;
 	TSharedPtr<Derived> DerivedPtr0 = MakeShared<Derived>();
 	TSharedPtr<Base> BasePtr0 = DerivedPtr0;
+	TSharedPtr<Derived> DerivedPtr1 = StaticCast<Derived>(BasePtr0);
+	TSharedPtr<Derived> DerivedPtr3 = StaticCast<Derived>(::Move(BasePtr0));
 
+	TSharedPtr<Derived[]> DerivedPtr2 = MakeShared<Derived[]>(5);
+	TSharedPtr<Base[]> BasePtr2 = StaticCast<Derived[]>(DerivedPtr2);
+	TSharedPtr<Base[]> BasePtr3 = StaticCast<Derived[]>(::Move(DerivedPtr2));
+	
+	TSharedPtr<const Uint32> ConstPtr0 = MakeShared<const Uint32>(5);
+	std::cout << "ConstPtr0=" << *ConstPtr0 << std::endl;
+	TSharedPtr<Uint32> ConstPtr1 = ConstCast<Uint32>(ConstPtr0);
+	std::cout << "ConstPtr1=" << *ConstPtr1 << std::endl;
+	
+	constexpr Uint32 Num = 5;
+	TSharedPtr<Uint32[]> ConstPtr3 = MakeShared<Uint32[]>(5);
+	std::cout << "ConstPtr3=" << std::endl;
+	for (Uint32 i = 0; i < Num; i++)
+	{
+		ConstPtr3[i] = i;
+		std::cout << ConstPtr3[i] << std::endl;
+	}
+
+	TSharedPtr<const Uint32[]> ConstPtr4 = ConstCast<const Uint32[]>(ConstPtr3);
+	std::cout << "ConstPtr4=" << std::endl;
+	for (Uint32 i = 0; i < Num; i++)
+	{
+		std::cout << ConstPtr4[i] << std::endl;
+	}
+	
 	TWeakPtr<Base> WeakBase0 = BasePtr0;
 	TWeakPtr<Derived> WeakBase1 = DerivedPtr0;
 
+	std::cout << "Testing Move" << std::endl;
+	TSharedPtr<Uint32> MovePtr0 = MakeShared<Uint32>(32);
+	std::cout << "MovePtr=" << *MovePtr0 << std::endl;
+	TSharedPtr<Uint32> MovePtr1 = Move(MovePtr0);
+	std::cout << "MovePtr1=" << *MovePtr1 << std::endl;
+	
+	TSharedPtr<Uint32[]> MovePtr3 = MakeShared<Uint32[]>(Num);
+	std::cout << "MovePtr3=" << std::endl;
+	for (Uint32 i = 0; i < Num; i++)
+	{
+		MovePtr3[i] = i;
+		std::cout << MovePtr3[i] << std::endl;
+	}
+	
+	TSharedPtr<Uint32[]> MovePtr4 = Move(MovePtr3);
+	std::cout << "MovePtr4=" << std::endl;
+	for (Uint32 i = 0; i < Num; i++)
+	{
+		std::cout << MovePtr4[i] << std::endl;
+	}
+	
 	std::cout << "Testing Array types" << std::endl;
 	TSharedPtr<Uint32[]> UintArr0 = MakeShared<Uint32[]>(5);
 	TWeakPtr<Uint32[]> WeakArr = UintArr0;

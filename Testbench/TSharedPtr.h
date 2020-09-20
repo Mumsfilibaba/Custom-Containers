@@ -259,6 +259,23 @@ protected:
 		Counter	= Other.Counter;
 		InternalAddStrongRef();
 	}
+	
+	template<typename TOther, typename DOther>
+	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other, T* InPtr)
+	{
+		Ptr		= InPtr;
+		Counter	= Other.Counter;
+		InternalAddStrongRef();
+	}
+	
+	template<typename TOther, typename DOther>
+	FORCEINLINE void InternalConstructStrong(TPtrBase<TOther, DOther>&& Other, T* InPtr)
+	{
+		Ptr		= InPtr;
+		Counter	= Other.Counter;
+		Other.Ptr		= nullptr;
+		Other.Counter	= nullptr;
+	}
 
 	FORCEINLINE void InternalConstructWeak(T* InPtr)
 	{
@@ -312,6 +329,7 @@ protected:
 		Counter = nullptr;
 	}
 
+protected:
 	T* Ptr;
 	PtrControlBlock* Counter;
 	D Deleter;
@@ -374,6 +392,20 @@ public:
 	{
 		static_assert(std::is_convertible<TOther, T>());
 		TBase::template InternalMove<TOther>(::Move(Other));
+	}
+	
+	template<typename TOther>
+	FORCEINLINE TSharedPtr(const TSharedPtr<TOther>& Other, T* InPtr) noexcept
+		: TBase()
+	{
+		TBase::template InternalConstructStrong<TOther>(Other, InPtr);
+	}
+	
+	template<typename TOther>
+	FORCEINLINE TSharedPtr(TSharedPtr<TOther>&& Other, T* InPtr) noexcept
+		: TBase()
+	{
+		TBase::template InternalConstructStrong<TOther>(::Move(Other), InPtr);
 	}
 
 	template<typename TOther>
@@ -549,15 +581,29 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TSharedPtr(const TSharedPtr<TOther>& Other) noexcept
+	FORCEINLINE TSharedPtr(const TSharedPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
 		TBase::template InternalConstructStrong<TOther>(Other);
 	}
+	
+	template<typename TOther>
+	FORCEINLINE TSharedPtr(const TSharedPtr<TOther[]>& Other, T* InPtr) noexcept
+		: TBase()
+	{
+		TBase::template InternalConstructStrong<TOther>(Other, InPtr);
+	}
+	
+	template<typename TOther>
+	FORCEINLINE TSharedPtr(TSharedPtr<TOther[]>&& Other, T* InPtr) noexcept
+		: TBase()
+	{
+		TBase::template InternalConstructStrong<TOther>(::Move(Other), InPtr);
+	}
 
 	template<typename TOther>
-	FORCEINLINE TSharedPtr(TSharedPtr<TOther>&& Other) noexcept
+	FORCEINLINE TSharedPtr(TSharedPtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -573,7 +619,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TSharedPtr(TUniquePtr<TOther>&& Other) noexcept
+	FORCEINLINE TSharedPtr(TUniquePtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -629,7 +675,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TSharedPtr& operator=(const TSharedPtr<TOther>& Other) noexcept
+	FORCEINLINE TSharedPtr& operator=(const TSharedPtr<TOther[]>& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>());
 
@@ -643,7 +689,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TSharedPtr& operator=(TSharedPtr<TOther>&& Other) noexcept
+	FORCEINLINE TSharedPtr& operator=(TSharedPtr<TOther[]>&& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>());
 
@@ -916,7 +962,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr(const TWeakPtr<TOther>& Other) noexcept
+	FORCEINLINE TWeakPtr(const TWeakPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
@@ -924,7 +970,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr(TWeakPtr<TOther>&& Other) noexcept
+	FORCEINLINE TWeakPtr(TWeakPtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
@@ -986,7 +1032,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr& operator=(const TWeakPtr<TOther>& Other) noexcept
+	FORCEINLINE TWeakPtr& operator=(const TWeakPtr<TOther[]>& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
 
@@ -1000,7 +1046,7 @@ public:
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr& operator=(TWeakPtr<TOther>&& Other) noexcept
+	FORCEINLINE TWeakPtr& operator=(TWeakPtr<TOther[]>&& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
 
@@ -1068,4 +1114,84 @@ std::enable_if_t<std::is_array_v<T>, TSharedPtr<T>> MakeShared(Uint32 Size) noex
 
 	TType* RefCountedPtr = new TType[Size];
 	return ::Move(TSharedPtr<T>(RefCountedPtr));
+}
+
+/*
+* Casting functions
+*/
+
+// static_cast
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> StaticCast(const TSharedPtr<T1>& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = static_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(Pointer, RawPointer));
+}
+
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> StaticCast(TSharedPtr<T1>&& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = static_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(::Move(Pointer), RawPointer));
+}
+
+// const_cast
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> ConstCast(const TSharedPtr<T1>& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = const_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(Pointer, RawPointer));
+}
+
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> ConstCast(TSharedPtr<T1>&& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = const_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(::Move(Pointer), RawPointer));
+}
+
+// reinterpret_cast
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> ReinterpretCast(const TSharedPtr<T1>& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = reinterpret_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(Pointer, RawPointer));
+}
+
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> ReinterpretCast(TSharedPtr<T1>&& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = reinterpret_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(::Move(Pointer), RawPointer));
+}
+
+// dynamic_cast
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> DynamicCast(const TSharedPtr<T1>& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = dynamic_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(Pointer, RawPointer));
+}
+
+template<typename T0, typename T1>
+std::enable_if_t<std::is_array_v<T0> == std::is_array_v<T0>, TSharedPtr<T0>> DynamicCast(TSharedPtr<T1>&& Pointer)
+{
+	using TType = TRemoveExtent<T0>;
+	
+	TType* RawPointer = dynamic_cast<TType*>(Pointer.Get());
+	return ::Move(TSharedPtr<T0>(::Move(Pointer), RawPointer));
 }
