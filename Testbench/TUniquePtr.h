@@ -19,6 +19,11 @@ public:
 	{
 	}
 
+	FORCEINLINE TUniquePtr(std::nullptr_t) noexcept
+		: Ptr(nullptr)
+	{
+	}
+
 	FORCEINLINE explicit TUniquePtr(T* InPtr) noexcept
 		: Ptr(InPtr)
 	{
@@ -174,6 +179,11 @@ public:
 	TUniquePtr& operator=(const TUniquePtr& Other) noexcept = delete;
 
 	FORCEINLINE TUniquePtr() noexcept
+		: Ptr(nullptr)
+	{
+	}
+
+	FORCEINLINE TUniquePtr(std::nullptr_t) noexcept
 		: Ptr(nullptr)
 	{
 	}
