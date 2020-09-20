@@ -217,7 +217,7 @@ protected:
 	template<typename TOther, typename DOther>
 	FORCEINLINE void InternalMove(TPtrBase<TOther, DOther>&& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		Ptr		= static_cast<TOther*>(Other.Ptr);
 		Counter	= Other.Counter;
@@ -236,7 +236,7 @@ protected:
 	template<typename TOther, typename DOther>
 	FORCEINLINE void InternalConstructStrong(TOther* InPtr)
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		Ptr		= static_cast<T*>(InPtr);
 		Counter = new PtrControlBlock();
@@ -253,7 +253,7 @@ protected:
 	template<typename TOther, typename DOther>
 	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other)
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		Ptr		= static_cast<T*>(Other.Ptr);
 		Counter	= Other.Counter;
@@ -287,7 +287,7 @@ protected:
 	template<typename TOther>
 	FORCEINLINE void InternalConstructWeak(TOther* InPtr)
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		Ptr		= static_cast<T*>(InPtr);
 		Counter = new PtrControlBlock();
@@ -304,7 +304,7 @@ protected:
 	template<typename TOther, typename DOther>
 	FORCEINLINE void InternalConstructWeak(const TPtrBase<TOther, DOther>& Other)
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		Ptr		= static_cast<T*>(Other.Ptr);
 		Counter	= Other.Counter;
@@ -382,7 +382,7 @@ public:
 	FORCEINLINE TSharedPtr(const TSharedPtr<TOther>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther>(Other);
 	}
 
@@ -390,7 +390,7 @@ public:
 	FORCEINLINE TSharedPtr(TSharedPtr<TOther>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 	
@@ -412,7 +412,7 @@ public:
 	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther>(Other);
 	}
 
@@ -420,7 +420,7 @@ public:
 	FORCEINLINE TSharedPtr(TUniquePtr<TOther>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther, TDelete<T>>(Other.Release());
 	}
 
@@ -480,7 +480,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TSharedPtr& operator=(const TSharedPtr<TOther>& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		if (this != std::addressof(Other))
 		{
@@ -494,7 +494,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TSharedPtr& operator=(TSharedPtr<TOther>&& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		if (this != std::addressof(Other))
 		{
@@ -584,7 +584,7 @@ public:
 	FORCEINLINE TSharedPtr(const TSharedPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther>(Other);
 	}
 	
@@ -606,7 +606,7 @@ public:
 	FORCEINLINE TSharedPtr(TSharedPtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
@@ -614,7 +614,7 @@ public:
 	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther>(Other);
 	}
 
@@ -622,7 +622,7 @@ public:
 	FORCEINLINE TSharedPtr(TUniquePtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 		TBase::template InternalConstructStrong<TOther>(Other.Release());
 	}
 
@@ -677,7 +677,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TSharedPtr& operator=(const TSharedPtr<TOther[]>& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		if (this != std::addressof(Other))
 		{
@@ -691,7 +691,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TSharedPtr& operator=(TSharedPtr<TOther[]>&& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>());
+		static_assert(std::is_convertible<TOther*, T*>());
 
 		if (this != std::addressof(Other))
 		{
@@ -764,7 +764,7 @@ public:
 	FORCEINLINE TWeakPtr(const TSharedPtr<TOther>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
@@ -784,7 +784,7 @@ public:
 	FORCEINLINE TWeakPtr(const TWeakPtr<TOther>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
@@ -792,7 +792,7 @@ public:
 	FORCEINLINE TWeakPtr(TWeakPtr<TOther>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
@@ -858,7 +858,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TWeakPtr& operator=(const TWeakPtr<TOther>& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 
 		if (this != std::addressof(Other))
 		{
@@ -872,7 +872,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TWeakPtr& operator=(TWeakPtr<TOther>&& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 
 		if (this != std::addressof(Other))
 		{
@@ -945,7 +945,7 @@ public:
 	FORCEINLINE TWeakPtr(const TSharedPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
@@ -965,7 +965,7 @@ public:
 	FORCEINLINE TWeakPtr(const TWeakPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
@@ -973,7 +973,7 @@ public:
 	FORCEINLINE TWeakPtr(TWeakPtr<TOther[]>&& Other) noexcept
 		: TBase()
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
@@ -1034,7 +1034,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TWeakPtr& operator=(const TWeakPtr<TOther[]>& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 
 		if (this != std::addressof(Other))
 		{
@@ -1048,7 +1048,7 @@ public:
 	template<typename TOther>
 	FORCEINLINE TWeakPtr& operator=(TWeakPtr<TOther[]>&& Other) noexcept
 	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
+		static_assert(std::is_convertible<TOther*, T*>(), "TWeakPtr: Trying to convert non-convertable types");
 
 		if (this != std::addressof(Other))
 		{
