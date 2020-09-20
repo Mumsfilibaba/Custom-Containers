@@ -1038,7 +1038,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// Smart Pointers
-#if 0
+#if 1
 	// TSharedPtr
 	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
 
@@ -1154,7 +1154,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// String
-#if 1
+#if 0
 	String Str0;
 	String Str1 = "Test String";
 	

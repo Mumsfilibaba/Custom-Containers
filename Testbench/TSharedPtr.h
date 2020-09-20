@@ -357,7 +357,7 @@ public:
 	FORCEINLINE TSharedPtr(TSharedPtr&& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalMove(Move(Other));
+		TBase::InternalMove(::Move(Other));
 	}
 
 	template<typename TOther>
@@ -373,19 +373,11 @@ public:
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
-		TBase::template InternalMove<TOther>(Move(Other));
+		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
 	template<typename TOther>
 	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther>& Other) noexcept
-		: TBase()
-	{
-		static_assert(std::is_convertible<TOther, T>());
-		TBase::template InternalConstructStrong<TOther>(Other);
-	}
-	
-	template<typename TOther>
-	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -447,7 +439,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -475,7 +467,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::template InternalMove<TOther>(Move(Other));
+			TBase::template InternalMove<TOther>(::Move(Other));
 		}
 
 		return *this;
@@ -553,7 +545,7 @@ public:
 	FORCEINLINE TSharedPtr(TSharedPtr&& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalMove(Move(Other));
+		TBase::InternalMove(::Move(Other));
 	}
 
 	template<typename TOther>
@@ -569,11 +561,11 @@ public:
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
-		TBase::template InternalMove<TOther>(Move(Other));
+		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
 	template<typename TOther>
-	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther>& Other) noexcept
+	FORCEINLINE explicit TSharedPtr(const TWeakPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>());
@@ -630,7 +622,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -658,7 +650,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::template InternalMove<TOther>(Move(Other));
+			TBase::template InternalMove<TOther>(::Move(Other));
 		}
 
 		return *this;
@@ -716,18 +708,18 @@ public:
 	{
 	}
 
-	FORCEINLINE TWeakPtr(const TSharedPtr<T>& InPtr) noexcept
+	FORCEINLINE TWeakPtr(const TSharedPtr<T>& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalConstructWeak(InPtr);
+		TBase::InternalConstructWeak(Other);
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr(const TSharedPtr<TOther>& InPtr) noexcept
+	FORCEINLINE TWeakPtr(const TSharedPtr<TOther>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
-		TBase::template InternalConstructWeak<TOther>(InPtr);
+		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
 	FORCEINLINE TWeakPtr(const TWeakPtr& Other) noexcept
@@ -739,7 +731,7 @@ public:
 	FORCEINLINE TWeakPtr(TWeakPtr&& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalMove(Move(Other));
+		TBase::InternalMove(::Move(Other));
 	}
 
 	template<typename TOther>
@@ -755,7 +747,7 @@ public:
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
-		TBase::template InternalMove<TOther>(Move(Other));
+		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
 	FORCEINLINE ~TWeakPtr()
@@ -781,7 +773,7 @@ public:
 	FORCEINLINE TSharedPtr<T> MakeShared() noexcept
 	{
 		const TWeakPtr& This = *this;
-		return Move(TSharedPtr<T>(This));
+		return ::Move(TSharedPtr<T>(This));
 	}
 
 	FORCEINLINE T* operator->() const noexcept
@@ -811,7 +803,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -839,7 +831,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -897,26 +889,18 @@ public:
 	{
 	}
 
-	FORCEINLINE TWeakPtr(const TSharedPtr<T>& InPtr) noexcept
+	FORCEINLINE TWeakPtr(const TSharedPtr<T>& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalConstructWeak(InPtr);
+		TBase::InternalConstructWeak(Other);
 	}
 
 	template<typename TOther>
-	FORCEINLINE TWeakPtr(const TSharedPtr<TOther>& InPtr) noexcept
+	FORCEINLINE TWeakPtr(const TSharedPtr<TOther[]>& Other) noexcept
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
-		TBase::template InternalConstructWeak<TOther>(InPtr);
-	}
-	
-	template<typename TOther>
-	FORCEINLINE TWeakPtr(const TSharedPtr<TOther[]>& InPtr) noexcept
-		: TBase()
-	{
-		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
-		TBase::template InternalConstructWeak<TOther>(InPtr);
+		TBase::template InternalConstructWeak<TOther>(Other);
 	}
 
 	FORCEINLINE TWeakPtr(const TWeakPtr& Other) noexcept
@@ -928,7 +912,7 @@ public:
 	FORCEINLINE TWeakPtr(TWeakPtr&& Other) noexcept
 		: TBase()
 	{
-		TBase::InternalMove(Move(Other));
+		TBase::InternalMove(::Move(Other));
 	}
 
 	template<typename TOther>
@@ -944,7 +928,7 @@ public:
 		: TBase()
 	{
 		static_assert(std::is_convertible<TOther, T>(), "TWeakPtr: Trying to convert non-convertable types");
-		TBase::template InternalMove<TOther>(Move(Other));
+		TBase::template InternalMove<TOther>(::Move(Other));
 	}
 
 	FORCEINLINE ~TWeakPtr()
@@ -967,10 +951,10 @@ public:
 		return (TBase::GetStrongReferences() < 1);
 	}
 
-	FORCEINLINE TSharedPtr<T> MakeShared() noexcept
+	FORCEINLINE TSharedPtr<T[]> MakeShared() noexcept
 	{
 		const TWeakPtr& This = *this;
-		return Move(TSharedPtr<T>(This));
+		return ::Move(TSharedPtr<T[]>(This));
 	}
 	
 	FORCEINLINE T& operator[](Uint32 Index) noexcept
@@ -995,7 +979,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -1023,7 +1007,7 @@ public:
 		if (this != std::addressof(Other))
 		{
 			Reset();
-			TBase::InternalMove(Move(Other));
+			TBase::InternalMove(::Move(Other));
 		}
 
 		return *this;
@@ -1074,7 +1058,7 @@ template<typename T, typename... TArgs>
 std::enable_if_t<!std::is_array_v<T>, TSharedPtr<T>> MakeShared(TArgs&&... Args) noexcept
 {
 	T* RefCountedPtr = new T(Forward<TArgs>(Args)...);
-	return Move(TSharedPtr<T>(RefCountedPtr));
+	return ::Move(TSharedPtr<T>(RefCountedPtr));
 }
 
 template<typename T>
@@ -1083,5 +1067,5 @@ std::enable_if_t<std::is_array_v<T>, TSharedPtr<T>> MakeShared(Uint32 Size) noex
 	using TType = TRemoveExtent<T>;
 
 	TType* RefCountedPtr = new TType[Size];
-	return Move(TSharedPtr<T>(RefCountedPtr));
+	return ::Move(TSharedPtr<T>(RefCountedPtr));
 }
