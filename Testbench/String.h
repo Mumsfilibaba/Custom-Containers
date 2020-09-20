@@ -10,6 +10,16 @@ public:
     {
         Left = STACK_BYTES;
     }
+	
+	inline String(const Char* InStr)
+	{
+		const SizeType Len = static_cast<SizeType>(strlen(InStr));
+		if (Len < STACK_BYTES)
+		{
+			strcpy(Characters, InStr);
+			Left = STACK_BYTES - Len;
+		}
+	}
 
     inline SizeType Size() const
     {
@@ -17,9 +27,8 @@ public:
     }
 
 private:
-    
-
-    inline static constexpr SizeType STACK_BYTES = 32;
+	inline static constexpr SizeType STACK_BYTES = 32;
+	
     union
     {
         Char StackBuffer[STACK_BYTES];

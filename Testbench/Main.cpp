@@ -16,6 +16,7 @@
 #include "TSharedPtr.h"
 #include "TUniquePtr.h"
 #include "TFunction.h"
+#include "String.h"
 
 struct Vec3
 {
@@ -566,7 +567,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings4);
 
 		std::cout << "After Reserve" << std::endl << std::endl;
-		Strings4.Reserve(Strings4.GetCapacity());
+		Strings4.Reserve(Strings4.Capacity());
 		PrintArr(Strings4);
 
 		std::cout << "Shrinking" << std::endl << std::endl;
@@ -578,7 +579,7 @@ int main(int Argc, const char* Argv[])
 		PrintArr(Strings4);
 
 		std::cout << "Resize" << std::endl << std::endl;
-		Strings4.Resize(Strings4.GetCapacity() - 2, "This spot is reserved");
+		Strings4.Resize(Strings4.Capacity() - 2, "This spot is reserved");
 		PrintArr(Strings4);
 
 		// Shrink To Fit
@@ -754,13 +755,20 @@ int main(int Argc, const char* Argv[])
 		std::cout << std::endl << "Testing Iterators" << std::endl;
 		
 		std::cout << std::endl << "Iterators" << std::endl << std::endl;
-		for (auto It = Strings2.Begin(); It != Strings2.End(); It++)
+		for (auto It = Strings2.begin(); It != Strings2.end(); It++)
 		{
 			std::cout << (*It) << std::endl;
 		}
+		
+		std::cout << std::endl;
+		
+		for (std::string& Str : Strings2)
+		{
+			std::cout << Str << std::endl;
+		}
 
 		std::cout << std::endl << "Reverse Iterators" << std::endl << std::endl;
-		for (auto It = Strings2.ReverseBegin(); It != Strings2.ReverseEnd(); It++)
+		for (auto It = Strings2.rbegin(); It != Strings2.rend(); It++)
 		{
 			std::cout << (*It) << std::endl;
 		}
@@ -768,7 +776,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// TArray<vec3>
-#if 1
+#if 0
 	{
 		std::cout << "Testing TArray<Vec3>" << std::endl;
 		std::cout << std::endl << "Testing Constructors" << std::endl;
@@ -1030,7 +1038,7 @@ int main(int Argc, const char* Argv[])
 #endif
 
 	// Smart Pointers
-#if 1
+#if 0
 	// TSharedPtr
 	std::cout << std::endl << "----------TSharedPtr----------" << std::endl << std::endl;
 
@@ -1083,7 +1091,7 @@ int main(int Argc, const char* Argv[])
 #endif
 	
 	// TFunction
-#if 1
+#if 0
 	std::cout << std::endl << "----------TFunction----------" << std::endl << std::endl;
 	std::cout << "Testing constructors" << std::endl;
 	
@@ -1145,6 +1153,14 @@ int main(int Argc, const char* Argv[])
 	MemberFunc(100);
 #endif
 
+	// String
+#if 1
+	String Str0;
+	String Str1 = "Test String";
+	
+	
+#endif
+	
 #if 0
 	//Performance
 	BenchMark();

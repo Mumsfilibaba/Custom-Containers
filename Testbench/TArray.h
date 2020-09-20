@@ -534,7 +534,7 @@ public:
 	FORCEINLINE Iterator Insert(ConstIterator Pos, TInputIt InBegin, TInputIt InEnd) noexcept
 	{
 		// Insert at InEnd
-		if (Pos == ConstEnd())
+		if (Pos == cend())
 		{
 			const SizeType OldSize = ArraySize;
 			for (TInputIt It = InBegin; It != InEnd; It++)
@@ -818,32 +818,32 @@ public:
 
 	FORCEINLINE ReverseIterator rbegin() noexcept
 	{
-		return ReverseIterator(ArrayPtr);
+		return ReverseIterator(ArrayPtr + ArraySize);
 	}
 
 	FORCEINLINE ReverseIterator rend() noexcept
 	{
-		return ReverseIterator(ArrayPtr + ArraySize);
+		return ReverseIterator(ArrayPtr);
 	}
 
 	FORCEINLINE ReverseConstIterator rbegin() const noexcept
 	{
-		return ReverseConstIterator(ArrayPtr);
+		return ReverseConstIterator(ArrayPtr + ArraySize);
 	}
 
 	FORCEINLINE ReverseConstIterator rend() const noexcept
 	{
-		return ReverseConstIterator(ArrayPtr + ArraySize);
+		return ReverseConstIterator(ArrayPtr);
 	}
 
 	FORCEINLINE ReverseConstIterator crbegin() const noexcept
 	{
-		return ReverseConstIterator(ArrayPtr);
+		return ReverseConstIterator(ArrayPtr + ArraySize);
 	}
 
 	FORCEINLINE ReverseConstIterator crend() const noexcept
 	{
-		return ReverseConstIterator(ArrayPtr + ArraySize);
+		return ReverseConstIterator(ArrayPtr);
 	}
 
 private:
@@ -885,7 +885,7 @@ private:
 		}
 		else
 		{
-			return static_cast<SizeType>(std::Distance(InBegin, InEnd));
+			return static_cast<SizeType>(std::distance(InBegin, InEnd));
 		}
 	}
 
