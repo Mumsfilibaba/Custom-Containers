@@ -1,7 +1,7 @@
-workspace "Custom Containers"
+workspace "Containers"
     startproject "Testbench"
     architecture "x64"
-    warnings "extra"    
+    warnings "extra"
 
     -- Set output dir
     outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}-%{cfg.platform}"
@@ -17,17 +17,27 @@ workspace "Custom Containers"
     {
         "Debug",
         "Release",
+        "Production",
     }
 
     filter "configurations:Debug"
         symbols "on"
         runtime "Debug"
+        optimize "Off"
         defines
         {
             "_DEBUG",
         }
     filter "configurations:Release"
         symbols "on"
+        runtime "Release"
+        optimize "Full"
+        defines
+        {
+            "NDEBUG",
+        }
+    filter "configurations:Production"
+        symbols "off"
         runtime "Release"
         optimize "Full"
         defines
@@ -66,6 +76,7 @@ workspace "Custom Containers"
 			"%{prj.name}/**.hpp",
 			"%{prj.name}/**.inl",
 			"%{prj.name}/**.c",
-			"%{prj.name}/**.cpp",
+            "%{prj.name}/**.cpp",
+            "Containers/*.h",
         }
     project "*"

@@ -1,31 +1,34 @@
 #pragma once
-#include "TypeUtilities.h"
+#include "TUtilities.h"
 
+#include <initializer_list>
 #include <iterator>
 
 /*
-* Dynamic Array similar to std::vector
+* TArray - Dynamic Array similar to std::vector
 */
+
 template<typename T>
 class TArray
 {
 public:
-	typedef Uint32 SizeType;
+	typedef UInt32 SizeType;
 
 	/*
 	* TIterator
 	*/
+
 	template<typename TIteratorType>
 	class TIterator
 	{
 		friend class TArray;
 
 	public:
-		using iterator_category	= std::random_access_iterator_tag;
-		using difference_type	= SizeType;
-		using value_type		= TIteratorType;
-		using pointer			= TIteratorType*;
-		using reference			= TIteratorType&;
+		using iterator_category = std::random_access_iterator_tag;
+		using difference_type 	= SizeType;
+		using value_type 		= TIteratorType;
+		using pointer 			= TIteratorType*;
+		using reference 		= TIteratorType&;
 
 		~TIterator() = default;
 
@@ -138,12 +141,13 @@ public:
 		TIteratorType* Ptr;
 	};
 
-	typedef TIterator<T>			Iterator;
+	typedef TIterator<T>		Iterator;
 	typedef TIterator<const T>	ConstIterator;
 
 	/*
-	* Reverse Iterator: Stores for example End(), but will reference End() - 1
+	* TReverseIterator - Reverse Iterator: Stores for example End(), but will reference End() - 1
 	*/
+
 	template<typename TIteratorType>
 	class TReverseIterator
 	{
@@ -239,9 +243,6 @@ public:
 	typedef TReverseIterator<T>			ReverseIterator;
 	typedef TReverseIterator<const T>	ReverseConstIterator;
 
-	/*
-	* TArray API
-	*/
 public:
 	FORCEINLINE TArray() noexcept
 		: ArrayPtr(nullptr)
@@ -407,7 +408,7 @@ public:
 		}
 
 		T* DataEnd = ArrayPtr + ArraySize;
-		new(reinterpret_cast<VoidPtr>(DataEnd)) T(Forward<TArgs>(Args)...);
+		new(reinterpret_cast<Void*>(DataEnd)) T(Forward<TArgs>(Args)...);
 		ArraySize++;
 		return (*DataEnd);
 	}
@@ -451,7 +452,7 @@ public:
 			InternalDestruct(DataBegin);
 		}
 
-		new (reinterpret_cast<VoidPtr>(DataBegin)) T(Forward<TArgs>(Args)...);
+		new (reinterpret_cast<Void*>(DataBegin)) T(Forward<TArgs>(Args)...);
 		ArraySize++;
 		return Iterator(DataBegin);
 	}
@@ -939,7 +940,6 @@ private:
 
 		InternalReleaseData();
 		ArrayPtr = TempData;
-
 		ArrayCapacity = InCapacity;
 	}
 
@@ -1028,7 +1028,7 @@ private:
 		{
 			while (InBegin != InEnd)
 			{
-				new(reinterpret_cast<VoidPtr>(Dest)) T(*InBegin);
+				new(reinterpret_cast<Void*>(Dest)) T(*InBegin);
 				InBegin++;
 				Dest++;
 			}
@@ -1040,7 +1040,7 @@ private:
 		T* ItEnd = Dest + Size;
 		while (Dest != ItEnd)
 		{
-			new(reinterpret_cast<VoidPtr>(Dest)) T(Value);
+			new(reinterpret_cast<Void*>(Dest)) T(Value);
 			Dest++;
 		}
 	}
@@ -1058,7 +1058,7 @@ private:
 		{
 			while (InBegin != InEnd)
 			{
-				new(reinterpret_cast<VoidPtr>(Dest)) T(::Move(*InBegin));
+				new(reinterpret_cast<Void*>(Dest)) T(::Move(*InBegin));
 				InBegin++;
 				Dest++;
 			}
@@ -1144,6 +1144,7 @@ private:
 	FORCEINLINE void InternalDestructRange(const T* InBegin, const T* InEnd)
 	{
 		VALIDATE(InBegin <= InEnd);
+		VALIDATE(InEnd - InBegin <= ArrayCapacity);
 
 		// Calls the destructor for every object in the range (If It needs to be called)
 		if constexpr (std::is_trivially_destructible<T>() == false)
@@ -1165,7 +1166,7 @@ private:
 		{
 			while (InBegin != InEnd)
 			{
-				new(reinterpret_cast<VoidPtr>(InBegin)) T();
+				new(reinterpret_cast<Void*>(InBegin)) T();
 				InBegin++;
 			}
 		}

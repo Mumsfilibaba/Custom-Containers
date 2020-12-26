@@ -1,9 +1,10 @@
 #pragma once
-#include "TypeUtilities.h"
+#include "TUtilities.h"
 
 /*
 * TUniquePtr - Scalar values
 */
+
 template<typename T>
 class TUniquePtr
 {
@@ -168,6 +169,7 @@ private:
 /*
 * TUniquePtr - Array values
 */
+
 template<typename T>
 class TUniquePtr<T[]>
 {
@@ -247,7 +249,7 @@ public:
 		return GetAddressOf();
 	}
 
-	FORCEINLINE T& operator[](Uint32 Index) noexcept
+	FORCEINLINE T& operator[](UInt32 Index) noexcept
 	{
 		VALIDATE(Ptr != nullptr);
 		return Ptr[Index];
@@ -326,17 +328,18 @@ private:
 };
 
 /*
-* Creates a new object together with a UniquePtr
+* MakeUnique - Creates a new object together with a UniquePtr
 */
+
 template<typename T, typename... TArgs>
-std::enable_if_t<!std::is_array_v<T>, TUniquePtr<T>> MakeUnique(TArgs&&... Args) noexcept
+TEnableIf<!TIsArray<T>, TUniquePtr<T>> MakeUnique(TArgs&&... Args) noexcept
 {
 	T* UniquePtr = new T(Forward<TArgs>(Args)...);
 	return Move(TUniquePtr<T>(UniquePtr));
 }
 
 template<typename T>
-std::enable_if_t<std::is_array_v<T>, TUniquePtr<T>> MakeUnique(Uint32 Size) noexcept
+TEnableIf<TIsArray<T>, TUniquePtr<T>>MakeUnique(UInt32 Size) noexcept
 {
 	using TType = TRemoveExtent<T>;
 
