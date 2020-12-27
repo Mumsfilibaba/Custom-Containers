@@ -16,12 +16,12 @@ void TStaticArray_Test()
 	std::cout << "Testing At()" << std::endl;
 	for (UInt32 i = 0; i < Num; i++)
 	{
-		Numbers[i] = i;
+		Numbers.At(i) = i;
 	}
 	
 	for (UInt32 i = 0; i < Num; i++)
 	{
-		std::cout << ConstNumbers[i] << std::endl;
+		std::cout << ConstNumbers.At(i) << std::endl;
 	}
 	
 	std::cout << "Testing operator[]" << std::endl;

@@ -5,6 +5,70 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <chrono>
+
+/*
+* A very OO clock 
+*/
+
+struct Clock
+{
+	friend class ScopedClock;
+
+public:
+	Clock()
+		: Duration(0)
+		, TotalDuration(0)
+	{
+	}
+
+	inline void Reset()
+	{
+		Duration = 0;
+		TotalDuration = 0;
+	}
+
+	inline Int64 GetLastDuration() const
+	{
+		return Duration;
+	}
+
+	inline Int64 GetTotalDuration() const
+	{
+		return TotalDuration;
+	}
+
+private:
+	inline void AddDuration(Int64 InDuration)
+	{
+		Duration = InDuration;
+		TotalDuration += Duration;
+	}
+
+	Int64 Duration		= 0;
+	Int64 TotalDuration	= 0;
+};
+
+struct ScopedClock
+{
+	ScopedClock(Clock& InParent)
+		: Parent(InParent)
+		, t0(std::chrono::high_resolution_clock::now())
+		, t1()
+	{
+		t0 = std::chrono::high_resolution_clock::now();
+	}
+
+	~ScopedClock()
+	{
+		t1 = std::chrono::high_resolution_clock::now();
+		Parent.AddDuration(std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count());
+	}
+
+	Clock& Parent;
+	std::chrono::steady_clock::time_point t0;
+	std::chrono::steady_clock::time_point t1;
+};
 
 /*
  * Vec3
@@ -13,26 +77,26 @@
 struct Vec3
 {
 	Vec3()
-		: X(0.0)
-		, Y(0.0)
-		, Z(0.0)
+		: x(0.0)
+		, y(0.0)
+		, z(0.0)
 	{
 	}
 
-	Vec3(double InX, double InY, double InZ)
-		: X(InX)
-		, Y(InY)
-		, Z(InZ)
+	Vec3(Double InX, Double InY, Double InZ)
+		: x(InX)
+		, y(InY)
+		, z(InZ)
 	{
 	}
 
-	double X;
-	double Y;
-	double Z;
+	Double x;
+	Double y;
+	Double z;
 
-	operator std::string()
+	operator std::string() const
 	{
-		return std::to_string(X) + ", " + std::to_string(Y) + ", " + std::to_string(Z);
+		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
 	}
 };
 
@@ -91,41 +155,35 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<std::string> Strings0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+				
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings0.insert(Strings0.begin(), "My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<std::string> Strings1;
 
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings1.Insert(Strings1.Begin(), "My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 	}
 #endif
@@ -136,40 +194,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<std::string> Strings0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings0.emplace(Strings0.begin(), "My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<std::string> Strings1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings1.Emplace(Strings1.begin(), "My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -180,40 +232,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "PushBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<std::string> Strings0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings0.push_back("My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<std::string> Strings1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings1.PushBack("My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -224,40 +270,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "EmplaceBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<std::string> Strings0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings0.emplace_back("My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<std::string> Strings1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Strings1.EmplaceBack("My name is jeff");
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -270,40 +310,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "Insert (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<Vec3> Vectors0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors0.insert(Vectors0.begin(), Vec3(3.0, 5.0, -6.0));
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<Vec3> Vectors1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors1.Insert(Vectors1.Begin(), Vec3(3.0, 5.0, -6.0));
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -314,41 +348,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "Emplace (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<Vec3> Vectors0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors0.emplace(Vectors0.begin(), 3.0, 5.0, -6.0);
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<Vec3> Vectors1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
-					Vectors1.Emplace(Vectors1.Begin(), double(J + 1), 5.0, -6.0);
+					Vectors1.Emplace(Vectors1.Begin(), double(j + 1), 5.0, -6.0);
 				}
-
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -359,40 +386,34 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "PushBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<Vec3> Vectors0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors0.push_back(Vec3(3.0, 5.0, -6.0));
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<Vec3> Vectors1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors1.PushBack(Vec3(3.0, 5.0, -6.0));
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif
@@ -403,40 +424,35 @@ void TArray_Benchmark()
 		const UInt32 Iterations = 10000;
 		std::cout << std::endl << "EmplaceBack (Iterations=" << Iterations << ", TestCount=" << TestCount << ")" << std::endl;
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				std::vector<Vec3> Vectors0;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors0.emplace_back(3.0, 5.0, -6.0);
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
 
-			std::cout << "std::vector:" << Total / TestCount << "ns" << std::endl;
+			std::cout << "std::vector:" << Clock.GetTotalDuration() / TestCount << "ns" << std::endl;
 		}
 
 		{
-			UInt64 Total = 0;
-			for (UInt32 I = 0; I < TestCount; I++)
+			Clock Clock;
+			for (UInt32 i = 0; i < TestCount; i++)
 			{
 				TArray<Vec3> Vectors1;
-				auto t1 = std::chrono::high_resolution_clock::now();
-				for (UInt32 J = 0; J < Iterations; J++)
+
+				ScopedClock ScopedClock(Clock);
+				for (UInt32 j = 0; j < Iterations; j++)
 				{
 					Vectors1.EmplaceBack(3.0, 5.0, -6.0);
 				}
-				auto t2 = std::chrono::high_resolution_clock::now();
-
-				auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-				Total += duration;
 			}
-			std::cout << "TArray     :" << Total / Iterations << "ns" << std::endl;
+
+			std::cout << "TArray     :" << Clock.GetTotalDuration() / Iterations << "ns" << std::endl;
 		}
 	}
 #endif

@@ -162,8 +162,8 @@ public:
 		: StackBuffer()
 		, Func(nullptr)
 	{
-		constexpr UInt32 StackSize = sizeof(StackBuffer);
-		constexpr UInt32 FuncSize = sizeof(MemberFunction<T>);
+		constexpr UInt32 StackSize	= sizeof(StackBuffer);
+		constexpr UInt32 FuncSize	= sizeof(MemberFunction<T>);
 		static_assert(FuncSize <= StackSize, "Functor is too big for TFunction");
 
 		new(reinterpret_cast<Void*>(StackBuffer)) MemberFunction<T>(This, MemberFunc);
