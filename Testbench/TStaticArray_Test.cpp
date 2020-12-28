@@ -53,4 +53,14 @@ void TStaticArray_Test()
 	{
 		std::cout << Numbers[i] << std::endl;
 	}
+	
+	std::cout << "Testing Range Based For-Loops" << std::endl;
+	
+	constexpr UInt32 Num2 = 6;
+	TStaticArray<UInt32, Num2> Numbers1 = { 5, 6, 7 };
+	
+	for (const UInt32 Num : Numbers1)
+	{
+		std::cout << Num << std::endl;
+	}
 }

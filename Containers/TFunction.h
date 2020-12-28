@@ -70,13 +70,13 @@ private:
 };
 
 template<typename T, typename TReturn, typename... TArgs>
-inline TMemberFunction<T, TReturn(TArgs...)> BindMemberFunction(T* This, TReturn (T::*Func)(TArgs...))
+inline TMemberFunction<T, TReturn(TArgs...)> BindFunction(T* This, TReturn (T::*Func)(TArgs...))
 {
 	return ::Move(TMemberFunction<T, TReturn(TArgs...)>(This, Func));
 }
 
 template<typename T, typename TReturn, typename... TArgs>
-inline TConstMemberFunction<T, TReturn(TArgs...)> BindMemberFunction(const T* This, TReturn (T::*Func)(TArgs...) const)
+inline TConstMemberFunction<T, TReturn(TArgs...)> BindFunction(const T* This, TReturn (T::*Func)(TArgs...) const)
 {
 	return ::Move(TConstMemberFunction<T, TReturn(TArgs...)>(This, Func));
 }

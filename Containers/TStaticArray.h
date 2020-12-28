@@ -6,22 +6,10 @@
  */
 
 template<typename T, Int32 N>
-class TStaticArray
+struct TStaticArray
 {
-public:
-	FORCEINLINE TStaticArray() noexcept
-		: Array()
-	{
-	}
-	
-	FORCEINLINE TStaticArray(const TStaticArray& Other) noexcept
-		: Array()
-	{
-		for (UInt32 i = 0; i < N; i++)
-		{
-			Array[i] = Other.Array[i];
-		}
-	}
+	using Iterator 		= T*;
+	using ConstIterator	= const T*;
 	
 	FORCEINLINE T& Front()
 	{
@@ -63,6 +51,13 @@ public:
 		}
 	}
 	
+	FORCEINLINE void Swap(TStaticArray& Other)
+	{
+		TStaticArray TempArray(::Move(*this));
+		*this = ::Move(Other);
+		Other = ::Move(TempArray);
+	}
+	
 	FORCEINLINE UInt32 Size() const
 	{
 		return N;
@@ -88,19 +83,39 @@ public:
 		return At(Index);
 	}
 	
-	FORCEINLINE TStaticArray& operator=(const TStaticArray& Other)
+	/*
+	 * STL Iterators for range-based for loops
+	 */
+	
+	FORCEINLINE Iterator begin()
 	{
-		if (this != &Other)
-		{
-			for (UInt32 i = 0; i < N; i++)
-			{
-				Array[i] = Other.Array[i];
-			}
-		}
-		
-		return *this;
+		return Array;
 	}
 	
-private:
+	FORCEINLINE Iterator end()
+	{
+		return Array + N;
+	}
+	
+	FORCEINLINE ConstIterator begin() const
+	{
+		return Array;
+	}
+	
+	FORCEINLINE ConstIterator end() const
+	{
+		return Array + N;
+	}
+	
+	FORCEINLINE ConstIterator cbegin() const
+	{
+		return Array;
+	}
+	
+	FORCEINLINE ConstIterator cend() const
+	{
+		return Array + N;
+	}
+	
 	T Array[N];
 };

@@ -72,8 +72,11 @@ void TFunction_Test()
 	TFunction<bool(Int32)> NormalFunc = Func;
 	NormalFunc(5);
 	
-	TFunction<bool(Int32)> MemberFunc = BindMemberFunction(&a, &A::Func);
+	TFunction<bool(Int32)> MemberFunc = BindFunction(&a, &A::Func);
 	MemberFunc(10);
+	
+	TFunction<bool(Int32)> MemberFunc1 = BindFunction(&a, &A::ConstFunc);
+	MemberFunc1(666);
 	
 	TFunction<bool(Int32)> FunctorFunc = Fun;
 	FunctorFunc(15);
@@ -112,7 +115,7 @@ void TFunction_Test()
 
 	std::cout << "Testing Assign" << std::endl;
 	NormalFunc.Assign(Func2);
-	MemberFunc.Assign(BindMemberFunction(&a, &A::Func2));
+	MemberFunc.Assign(BindFunction(&a, &A::Func2));
 
 	NormalFunc(70);
 	MemberFunc(80);

@@ -267,8 +267,8 @@ public:
 		InternalConstruct(Size, Value);
 	}
 
-	template<typename TInputIt>
-	FORCEINLINE explicit TArray(TInputIt InBegin, TInputIt InEnd) noexcept
+	template<typename TInputIterator>
+	FORCEINLINE explicit TArray(TInputIterator InBegin, TInputIterator InEnd) noexcept
 		: ArrayPtr(nullptr)
 		, ArraySize(0)
 		, ArrayCapacity(0)
@@ -325,8 +325,8 @@ public:
 		InternalConstruct(Size, Value);
 	}
 
-	template<typename TInputIt>
-	FORCEINLINE void Assign(TInputIt InBegin, TInputIt InEnd) noexcept
+	template<typename TInputIterator>
+	FORCEINLINE void Assign(TInputIterator InBegin, TInputIterator InEnd) noexcept
 	{
 		Clear();
 		InternalConstruct(InBegin, InEnd);
@@ -525,20 +525,20 @@ public:
 		return Iterator(RangeBegin);
 	}
 
-	template<typename TInputIt>
-	FORCEINLINE Iterator Insert(Iterator Pos, TInputIt InBegin, TInputIt InEnd) noexcept
+	template<typename TInputIterator>
+	FORCEINLINE Iterator Insert(Iterator Pos, TInputIterator InBegin, TInputIterator InEnd) noexcept
 	{
 		return Insert(ConstIterator(Pos.Ptr), InBegin, InEnd);
 	}
 
-	template<typename TInputIt>
-	FORCEINLINE Iterator Insert(ConstIterator Pos, TInputIt InBegin, TInputIt InEnd) noexcept
+	template<typename TInputIterator>
+	FORCEINLINE Iterator Insert(ConstIterator Pos, TInputIterator InBegin, TInputIterator InEnd) noexcept
 	{
 		// Insert at InEnd
 		if (Pos == cend())
 		{
 			const SizeType OldSize = ArraySize;
-			for (TInputIt It = InBegin; It != InEnd; It++)
+			for (TInputIterator It = InBegin; It != InEnd; It++)
 			{
 				EmplaceBack(*It);
 			}
@@ -642,17 +642,9 @@ public:
 	{
 		if (this != std::addressof(Other))
 		{
-			T* tempPtr = ArrayPtr;
-			SizeType tempSize = ArraySize;
-			SizeType tempCapacity = ArrayCapacity;
-
-			ArrayPtr = Other.ArrayPtr;
-			ArraySize = Other.ArraySize;
-			ArrayCapacity = Other.ArrayCapacity;
-
-			Other.ArrayPtr = tempPtr;
-			Other.ArraySize = tempSize;
-			Other.ArrayCapacity = tempCapacity;
+			TArray TempArray(::Move(*this));
+			*this = ::Move(Other);
+			Other = ::Move(TempArray);
 		}
 	}
 
@@ -786,6 +778,7 @@ public:
 	/*
 	* STL iterator functions, Only here so that you can use Range for-loops
 	*/
+	
 public:
 	FORCEINLINE Iterator begin() noexcept
 	{
@@ -890,8 +883,8 @@ private:
 		}
 	}
 
-	template<typename TInputIt>
-	FORCEINLINE SizeType InternalIndex(TInputIt Pos)
+	template<typename TInputIterator>
+	FORCEINLINE SizeType InternalIndex(TInputIterator Pos)
 	{
 		return static_cast<SizeType>(InternalUnwrapConst(Pos) - InternalUnwrapConst(begin()));
 	}
@@ -1000,8 +993,8 @@ private:
 	{
 		InternalReleaseData();
 
-		ArrayPtr = Other.ArrayPtr;
-		ArraySize = Other.ArraySize;
+		ArrayPtr 	= Other.ArrayPtr;
+		ArraySize 	= Other.ArraySize;
 		ArrayCapacity = Other.ArrayCapacity;
 
 		Other.ArrayPtr = nullptr;
@@ -1010,13 +1003,13 @@ private:
 	}
 
 	// Emplace
-	template<typename TInputIt>
-	FORCEINLINE void InternalCopyEmplace(TInputIt InBegin, TInputIt InEnd, T* Dest)
+	template<typename TInputIterator>
+	FORCEINLINE void InternalCopyEmplace(TInputIterator InBegin, TInputIterator InEnd, T* Dest)
 	{
 		// This function assumes that there is no overlap
 		constexpr bool IsTrivial = std::is_trivially_copy_constructible<T>();
-		constexpr bool IsPointer = std::is_pointer<TInputIt>();
-		constexpr bool IsCustomIterator = std::is_same<TInputIt, Iterator>() || std::is_same<TInputIt, ConstIterator>();
+		constexpr bool IsPointer = std::is_pointer<TInputIterator>();
+		constexpr bool IsCustomIterator = std::is_same<TInputIterator, Iterator>() || std::is_same<TInputIterator, ConstIterator>();
 
 		if constexpr (IsTrivial && (IsPointer || IsCustomIterator))
 		{

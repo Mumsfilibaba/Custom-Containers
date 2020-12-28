@@ -23,14 +23,19 @@
  */
 
 #ifndef FORCEINLINE
-	#if	defined(_WIN32)
-		#define FORCEINLINE	__forceinline
-	#elif defined(__APPLE__)
-		#define FORCEINLINE	__attribute__((__always_inline__))
-	#else
-		#define FORCEINLINE inline
-	#endif
-#endif
+
+#ifndef _DEBUG
+#if	defined(_WIN32)
+	#define FORCEINLINE	__forceinline
+#elif defined(__APPLE__)
+	#define FORCEINLINE	__attribute__((__always_inline__))
+#else
+	#define FORCEINLINE inline
+#endif // Platform
+#else
+	#define FORCEINLINE inline
+#endif // Debug
+#endif // Forceinline
 
 /*
  * TRemoveReference - Removes reference and retrives the types
