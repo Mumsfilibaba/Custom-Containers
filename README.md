@@ -13,7 +13,7 @@ This repository contains a few container implementations. It is created mostly a
 * **TArray** does not support allocators
 * **TSharedPtr** and **TUniquePtr** does not support custom deleters
 
-**Planned**
+**Planned:**
 * **String**
 * **THashTable**
 * **TList**
