@@ -10,7 +10,7 @@ struct PtrControlBlock
 public:
 	typedef UInt32 RefType;
 
-	inline PtrControlBlock()
+	inline PtrControlBlock() noexcept
 		: WeakReferences(0)
 		, StrongReferences(0)
 	{
@@ -60,7 +60,7 @@ struct TDelete
 {
 	using TType = T;
 
-	FORCEINLINE void operator()(TType* Ptr)
+	FORCEINLINE void operator()(TType* Ptr) noexcept
 	{
 		delete Ptr;
 	}
@@ -71,7 +71,7 @@ struct TDelete<T[]>
 {
 	using TType = TRemoveExtent<T>;
 
-	FORCEINLINE void operator()(TType* Ptr)
+	FORCEINLINE void operator()(TType* Ptr) noexcept
 	{
 		delete[] Ptr;
 	}
@@ -229,7 +229,7 @@ protected:
 		Other.Counter	= nullptr;
 	}
 
-	FORCEINLINE void InternalConstructStrong(T* InPtr)
+	FORCEINLINE void InternalConstructStrong(T* InPtr) noexcept
 	{
 		Ptr		= InPtr;
 		Counter	= new PtrControlBlock();
@@ -237,7 +237,7 @@ protected:
 	}
 
 	template<typename TOther, typename DOther>
-	FORCEINLINE void InternalConstructStrong(TOther* InPtr)
+	FORCEINLINE void InternalConstructStrong(TOther* InPtr) noexcept
 	{
 		static_assert(std::is_convertible<TOther*, T*>());
 
@@ -246,7 +246,7 @@ protected:
 		InternalAddStrongRef();
 	}
 
-	FORCEINLINE void InternalConstructStrong(const TPtrBase& Other)
+	FORCEINLINE void InternalConstructStrong(const TPtrBase& Other) noexcept
 	{
 		Ptr		= Other.Ptr;
 		Counter	= Other.Counter;
@@ -254,7 +254,7 @@ protected:
 	}
 
 	template<typename TOther, typename DOther>
-	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other)
+	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther*, T*>());
 
@@ -264,7 +264,7 @@ protected:
 	}
 	
 	template<typename TOther, typename DOther>
-	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other, T* InPtr)
+	FORCEINLINE void InternalConstructStrong(const TPtrBase<TOther, DOther>& Other, T* InPtr) noexcept
 	{
 		Ptr		= InPtr;
 		Counter	= Other.Counter;
@@ -272,7 +272,7 @@ protected:
 	}
 	
 	template<typename TOther, typename DOther>
-	FORCEINLINE void InternalConstructStrong(TPtrBase<TOther, DOther>&& Other, T* InPtr)
+	FORCEINLINE void InternalConstructStrong(TPtrBase<TOther, DOther>&& Other, T* InPtr) noexcept
 	{
 		Ptr		= InPtr;
 		Counter	= Other.Counter;
@@ -280,7 +280,7 @@ protected:
 		Other.Counter	= nullptr;
 	}
 
-	FORCEINLINE void InternalConstructWeak(T* InPtr)
+	FORCEINLINE void InternalConstructWeak(T* InPtr) noexcept
 	{
 		Ptr		= InPtr;
 		Counter	= new PtrControlBlock();
@@ -288,7 +288,7 @@ protected:
 	}
 
 	template<typename TOther>
-	FORCEINLINE void InternalConstructWeak(TOther* InPtr)
+	FORCEINLINE void InternalConstructWeak(TOther* InPtr) noexcept
 	{
 		static_assert(std::is_convertible<TOther*, T*>());
 
@@ -297,7 +297,7 @@ protected:
 		InternalAddWeakRef();
 	}
 
-	FORCEINLINE void InternalConstructWeak(const TPtrBase& Other)
+	FORCEINLINE void InternalConstructWeak(const TPtrBase& Other) noexcept
 	{
 		Ptr		= Other.Ptr;
 		Counter = Other.Counter;
@@ -305,7 +305,7 @@ protected:
 	}
 
 	template<typename TOther, typename DOther>
-	FORCEINLINE void InternalConstructWeak(const TPtrBase<TOther, DOther>& Other)
+	FORCEINLINE void InternalConstructWeak(const TPtrBase<TOther, DOther>& Other) noexcept
 	{
 		static_assert(std::is_convertible<TOther*, T*>());
 
@@ -314,13 +314,13 @@ protected:
 		InternalAddWeakRef();
 	}
 
-	FORCEINLINE void InternalDestructWeak()
+	FORCEINLINE void InternalDestructWeak() noexcept
 	{
 		InternalReleaseWeakRef();
 		InternalClear();
 	}
 
-	FORCEINLINE void InternalDestructStrong()
+	FORCEINLINE void InternalDestructStrong() noexcept
 	{
 		InternalReleaseStrongRef();
 		InternalClear();
@@ -429,7 +429,7 @@ public:
 		TBase::template InternalConstructStrong<TOther, TDelete<T>>(Other.Release());
 	}
 
-	FORCEINLINE ~TSharedPtr()
+	FORCEINLINE ~TSharedPtr() noexcept
 	{
 		Reset();
 	}
@@ -1131,7 +1131,7 @@ TEnableIf<TIsArray<T>, TSharedPtr<T>> MakeShared(UInt32 Size) noexcept
 
 // static_cast
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(const TSharedPtr<T1>& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(const TSharedPtr<T1>& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1140,7 +1140,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(const TShared
 }
 
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(TSharedPtr<T1>&& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(TSharedPtr<T1>&& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1150,7 +1150,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> StaticCast(TSharedPtr<T1
 
 // const_cast
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(const TSharedPtr<T1>& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(const TSharedPtr<T1>& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1159,7 +1159,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(const TSharedP
 }
 
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(TSharedPtr<T1>&& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(TSharedPtr<T1>&& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1169,7 +1169,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ConstCast(TSharedPtr<T1>
 
 // reinterpret_cast
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(const TSharedPtr<T1>& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(const TSharedPtr<T1>& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1178,7 +1178,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(const TS
 }
 
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(TSharedPtr<T1>&& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(TSharedPtr<T1>&& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1188,7 +1188,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> ReinterpretCast(TSharedP
 
 // dynamic_cast
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> DynamicCast(const TSharedPtr<T1>& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> DynamicCast(const TSharedPtr<T1>& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	
@@ -1197,7 +1197,7 @@ TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> DynamicCast(const TShare
 }
 
 template<typename T0, typename T1>
-TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> DynamicCast(TSharedPtr<T1>&& Pointer)
+TEnableIf<TIsArray<T0> == TIsArray<T1>, TSharedPtr<T0>> DynamicCast(TSharedPtr<T1>&& Pointer) noexcept
 {
 	using TType = TRemoveExtent<T0>;
 	

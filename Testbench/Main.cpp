@@ -2,15 +2,17 @@
 #include "TSharedPtr_Test.h"
 #include "TFunction_Test.h"
 #include "TStaticArray_Test.h"
+#include "TArrayView_Test.h"
 
 // Defines
 #define RUN_TESTS		1
-#define RUN_BENCHMARK	1
+#define RUN_BENCHMARK	0
 // Test Specific defines
 #define RUN_TARRAY_TEST			1
 #define RUN_TSHAREDPTR_TEST		1
 #define RUN_TFUNCTION_TEST		1
 #define RUN_TSTATICARRAY_TEST	1
+#define RUN_TARRAYVIEW_TEST		1
 // Benchmark Specific defines
 #define RUN_TARRAY_BENCHMARKS	1
 
@@ -50,6 +52,10 @@ void Tests(Int32 Argc, const Char* Argv[])
 
 #if RUN_TSTATICARRAY_TEST
 	TStaticArray_Test();
+#endif
+
+#if RUN_TARRAYVIEW_TEST
+	TArrayView_Test();
 #endif
 }
 

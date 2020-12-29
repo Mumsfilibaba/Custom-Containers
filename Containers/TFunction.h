@@ -14,18 +14,18 @@ class TMemberFunction<T, TReturn(TArgs...)>
 public:
 	typedef TReturn(T::* TFunctionType)(TArgs...);
 	
-	FORCEINLINE TMemberFunction(T* InThis, TFunctionType InFunc)
+	FORCEINLINE TMemberFunction(T* InThis, TFunctionType InFunc) noexcept
 		: This(InThis)
 		, Func(InFunc)
 	{
 	}
 	
-	FORCEINLINE TReturn Invoke(TArgs&&... Args)
+	FORCEINLINE TReturn Invoke(TArgs&&... Args) noexcept
 	{
 		return ((*This).*Func)(::Forward<TArgs>(Args)...);
 	}
 	
-	FORCEINLINE TReturn operator()(TArgs&&... Args)
+	FORCEINLINE TReturn operator()(TArgs&&... Args) noexcept
 	{
 		return Invoke(::Forward<TArgs>(Args)...);
 	}
@@ -48,18 +48,18 @@ class TConstMemberFunction<T, TReturn(TArgs...)>
 public:
 	typedef TReturn(T::* TFunctionType)(TArgs...) const;
 	
-	FORCEINLINE TConstMemberFunction(const T* InThis, TFunctionType InFunc)
+	FORCEINLINE TConstMemberFunction(const T* InThis, TFunctionType InFunc) noexcept
 		: This(InThis)
 		, Func(InFunc)
 	{
 	}
 	
-	FORCEINLINE TReturn Invoke(TArgs&&... Args)
+	FORCEINLINE TReturn Invoke(TArgs&&... Args) noexcept
 	{
 		return ((*This).*Func)(::Forward<TArgs>(Args)...);
 	}
 	
-	FORCEINLINE TReturn operator()(TArgs&&... Args)
+	FORCEINLINE TReturn operator()(TArgs&&... Args) noexcept
 	{
 		return Invoke(::Forward<TArgs>(Args)...);
 	}
@@ -69,14 +69,18 @@ private:
 	TFunctionType Func;
 };
 
+/*
+ * BindFunction
+ */
+
 template<typename T, typename TReturn, typename... TArgs>
-inline TMemberFunction<T, TReturn(TArgs...)> BindFunction(T* This, TReturn (T::*Func)(TArgs...))
+inline TMemberFunction<T, TReturn(TArgs...)> BindFunction(T* This, TReturn (T::*Func)(TArgs...)) noexcept
 {
 	return ::Move(TMemberFunction<T, TReturn(TArgs...)>(This, Func));
 }
 
 template<typename T, typename TReturn, typename... TArgs>
-inline TConstMemberFunction<T, TReturn(TArgs...)> BindFunction(const T* This, TReturn (T::*Func)(TArgs...) const)
+inline TConstMemberFunction<T, TReturn(TArgs...)> BindFunction(const T* This, TReturn (T::*Func)(TArgs...) const) noexcept
 {
 	return ::Move(TConstMemberFunction<T, TReturn(TArgs...)>(This, Func));
 }
@@ -144,26 +148,12 @@ private:
 
 		inline virtual IFunctor* Clone(Void* Memory) noexcept override final
 		{
-			if (Memory)
-			{
-				return new(Memory) TGenericFunctor(*this);
-			}
-			else
-			{
-				return new TGenericFunctor(*this);
-			}
+			return new(Memory) TGenericFunctor(*this);
 		}
 
 		inline virtual IFunctor* Move(Void* Memory) noexcept override final
 		{
-			if (Memory)
-			{
-				return new(Memory) TGenericFunctor(::Move(*this));
-			}
-			else
-			{
-				return new TGenericFunctor(::Move(*this));
-			}
+			return new(Memory) TGenericFunctor(::Move(*this));
 		}
 
 	private:
@@ -215,7 +205,7 @@ public:
 		Release();
 	}
 
-	FORCEINLINE void Swap(TFunction& Other)
+	FORCEINLINE void Swap(TFunction& Other) noexcept
 	{
 		TFunction TempFunc(*this);
 		*this = Other;
@@ -223,19 +213,19 @@ public:
 	}
 
 	template<typename F>
-	FORCEINLINE void Assign(F&& Functor)
+	FORCEINLINE void Assign(F&& Functor) noexcept
 	{
 		Release();
 		Construct(::Forward<F>(Functor));
 	}
 	
-	FORCEINLINE TReturn Invoke(TArgs... Args) noexcept
+	FORCEINLINE TReturn Invoke(TArgs&&... Args) noexcept
 	{
 		VALIDATE(Func != nullptr);
 		return Func->Invoke(Forward<TArgs>(Args)...);
 	}
 
-	FORCEINLINE TReturn operator()(TArgs... Args) noexcept
+	FORCEINLINE TReturn operator()(TArgs&&... Args) noexcept
 	{
 		return Invoke(Forward<TArgs>(Args)...);
 	}
@@ -274,7 +264,7 @@ public:
 	}
 
 private:
-	FORCEINLINE void Release()
+	FORCEINLINE void Release() noexcept
 	{
 		if (Func)
 		{
@@ -294,7 +284,7 @@ private:
 	template<typename F>
 	FORCEINLINE TEnableIf<std::is_invocable_v<F, TArgs...>> Construct(F&& Functor) noexcept
 	{
-		if constexpr (ShouldStackAllocate<F>())
+		if constexpr (CanStackAllocate<F>())
 		{
 			Func = new(reinterpret_cast<Void*>(StackBuffer)) TGenericFunctor<F>(::Forward<F>(Functor));
 			StackAllocated = true;
@@ -302,7 +292,8 @@ private:
 		else
 		{
 			Func = new TGenericFunctor<F>(::Forward<F>(Functor));
-			StackAllocated = false;
+			SizeInBytes		= sizeof(TGenericFunctor<F>);
+			StackAllocated	= false;
 		}
 	}
 	
@@ -315,8 +306,9 @@ private:
 		}
 		else
 		{
-			Func = Other.Func->Move(nullptr);
-			StackAllocated = false;
+			Func = Other.Func->Move(::malloc(Other.SizeInBytes));
+			SizeInBytes		= Other.SizeInBytes;
+			StackAllocated	= false;
 		}
 	}
 	
@@ -329,13 +321,14 @@ private:
 		}
 		else
 		{
-			Func = Other.Func->Clone(nullptr);
-			StackAllocated = false;
+			Func = Other.Func->Clone(::malloc(Other.SizeInBytes));
+			SizeInBytes		= Other.SizeInBytes;
+			StackAllocated	= false;
 		}
 	}
 	
 	template<typename F>
-	FORCEINLINE static constexpr bool ShouldStackAllocate()
+	FORCEINLINE static constexpr bool CanStackAllocate() noexcept
 	{
 		constexpr UInt32 StackSize 		= sizeof(StackBuffer);
 		constexpr UInt32 FunctorSize 	= sizeof(TGenericFunctor<F>);
@@ -344,6 +337,10 @@ private:
 
 private:
 	IFunctor* Func = nullptr;
-	Byte StackBuffer[55];
 	Bool StackAllocated = true;
+	union
+	{
+		Byte StackBuffer[23];
+		UInt32 SizeInBytes;
+	};
 };

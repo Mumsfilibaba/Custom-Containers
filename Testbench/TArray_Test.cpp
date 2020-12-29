@@ -13,7 +13,7 @@
 
 struct Clock
 {
-	friend class ScopedClock;
+	friend struct ScopedClock;
 
 public:
 	Clock()
