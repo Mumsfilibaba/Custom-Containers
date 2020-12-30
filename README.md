@@ -1,5 +1,5 @@
-# Custom-Containers
-This repository contains a few container implementations. It is created mostly as a learning experience. Appreciate suggestions to improve them.
+# Tiny Custom Template Library
+This repository contains a few template library implementations. It is created mostly as a learning experience. Appreciate suggestions to improve them.
 
 **Current implementations:**
 * **TArray** - (Similar to std::vector)
