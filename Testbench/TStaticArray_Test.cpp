@@ -59,8 +59,8 @@ void TStaticArray_Test()
 	constexpr UInt32 Num2 = 6;
 	TStaticArray<UInt32, Num2> Numbers1 = { 5, 6, 7 };
 	
-	for (const UInt32 Num : Numbers1)
+	for (const UInt32 Number : Numbers1)
 	{
-		std::cout << Num << std::endl;
+		std::cout << Number << std::endl;
 	}
 }
