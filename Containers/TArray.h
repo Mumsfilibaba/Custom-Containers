@@ -338,6 +338,30 @@ public:
 		InternalConstruct(IList.begin(), IList.end());
 	}
 
+	FORCEINLINE TEnableIf<std::is_nothrow_copy_assignable_v<T>> Fill(const T& Value) noexcept
+	{
+		T* ArrayBegin	= ArrayPtr;
+		T* ArrayEnd		= ArrayBegin + ArraySize;
+
+		while (ArrayBegin != ArrayEnd)
+		{
+			*ArrayBegin = Value;
+			ArrayBegin++;
+		}
+	}
+
+	FORCEINLINE TEnableIf<std::is_nothrow_move_assignable_v<T>> Fill(T&& Value) noexcept
+	{
+		T* ArrayBegin = ArrayPtr;
+		T* ArrayEnd = ArrayBegin + ArraySize;
+
+		while (ArrayBegin != ArrayEnd)
+		{
+			*ArrayBegin = ::Move(Value);
+			ArrayBegin++;
+		}
+	}
+
 	FORCEINLINE void Resize(SizeType InSize) noexcept
 	{
 		if (InSize > ArraySize)
