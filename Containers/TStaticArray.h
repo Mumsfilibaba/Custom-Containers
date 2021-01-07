@@ -15,41 +15,41 @@ public:
 
 	FORCEINLINE T& Front() noexcept
 	{
-		return Array[0];
+		return Elements[0];
 	}
 	
 	FORCEINLINE const T& Front() const noexcept
 	{
-		return Array[0];
+		return Elements[0];
 	}
 	
 	FORCEINLINE T& Back() noexcept
 	{
-		return Array[N-1];
+		return Elements[N-1];
 	}
 	 
 	FORCEINLINE const T& Back() const noexcept
 	{
-		return Array[N-1];
+		return Elements[N-1];
 	}
 	
 	FORCEINLINE T& At(SizeType Index) noexcept
 	{
 		VALIDATE(Index < N);
-		return Array[Index];
+		return Elements[Index];
 	}
 	
 	FORCEINLINE const T& At(SizeType Index) const noexcept
 	{
 		VALIDATE(Index < N);
-		return Array[Index];
+		return Elements[Index];
 	}
 	
 	FORCEINLINE void Fill(const T& Value) noexcept
 	{
 		for (UInt32 i = 0; i < N; i++)
 		{
-			Array[i] = Value;
+			Elements[i] = Value;
 		}
 	}
 	
@@ -72,12 +72,12 @@ public:
 	
 	FORCEINLINE T* Data() noexcept
 	{
-		return Array;
+		return Elements;
 	}
 	
 	FORCEINLINE const T* Data() const noexcept
 	{
-		return Array;
+		return Elements;
 	}
 	
 	FORCEINLINE T& operator[](SizeType Index) noexcept
@@ -97,34 +97,34 @@ public:
 public:
 	FORCEINLINE Iterator begin() noexcept
 	{
-		return Array;
+		return Elements;
 	}
 	
 	FORCEINLINE Iterator end() noexcept
 	{
-		return Array + N;
+		return Elements + N;
 	}
 	
 	FORCEINLINE ConstIterator begin() const noexcept
 	{
-		return Array;
+		return Elements;
 	}
 	
 	FORCEINLINE ConstIterator end() const noexcept
 	{
-		return Array + N;
+		return Elements + N;
 	}
 	
 	FORCEINLINE ConstIterator cbegin() const noexcept
 	{
-		return Array;
+		return Elements;
 	}
 	
 	FORCEINLINE ConstIterator cend() const noexcept
 	{
-		return Array + N;
+		return Elements + N;
 	}
 
 public:
-	T Array[N];
+	T Elements[N];
 };

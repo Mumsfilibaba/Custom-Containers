@@ -78,5 +78,6 @@ workspace "Containers"
 			"%{prj.name}/**.c",
             "%{prj.name}/**.cpp",
             "Containers/*.h",
+			"Containers/*.natvis",
         }
     project "*"
