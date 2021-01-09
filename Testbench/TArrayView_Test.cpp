@@ -42,22 +42,27 @@ void TArrayView_Test()
 	UInt32 Arr2[] = { 21, 22, 23, 24 };
 	TArrayView<UInt32> ArrView2 = TArrayView<UInt32>(Arr2);
 
+	UInt32* DynamicPtr = new UInt32[]{ 31, 32, 33, 34, 35 };
+	TArrayView<UInt32> ArrView3 = TArrayView<UInt32>(DynamicPtr, DynamicPtr + 5);
+
 	std::cout << "Testing At and operator[]" << std::endl;
 	PrintArrayView(ArrView0);
 	PrintArrayView(ArrView1);
 	PrintArrayView(ArrView2);
+	PrintArrayView(ArrView3);
 
 	std::cout << "Testing range-based for-loops" << std::endl;
 	PrintArrayViewRangeBased(ArrView0);
 	PrintArrayViewRangeBased(ArrView1);
 	PrintArrayViewRangeBased(ArrView2);
+	PrintArrayViewRangeBased(ArrView3);
 
 	std::cout << "Testing copy/move constructor" << std::endl;
-	TArrayView<UInt32> ArrView3 = ArrView1;
-	TArrayView<UInt32> ArrView4 = ::Move(ArrView0);
+	TArrayView<UInt32> ArrView4 = ArrView1;
+	TArrayView<UInt32> ArrView5 = ::Move(ArrView0);
 
-	PrintArrayViewRangeBased(ArrView3);
 	PrintArrayViewRangeBased(ArrView4);
+	PrintArrayViewRangeBased(ArrView5);
 
 	std::cout << "Testing Size/SizeInBytes" << std::endl;
 	std::cout << "Size: " << ArrView4.Size() << std::endl;
@@ -65,14 +70,14 @@ void TArrayView_Test()
 
 	std::cout << "Testing Swap" << std::endl;
 	std::cout << "-----------Before----------" << std::endl;
-	PrintArrayViewRangeBased(ArrView3);
 	PrintArrayViewRangeBased(ArrView4);
+	PrintArrayViewRangeBased(ArrView5);
 
-	ArrView3.Swap(ArrView4);
+	ArrView4.Swap(ArrView5);
 
 	std::cout << "-----------After-----------" << std::endl;
-	PrintArrayViewRangeBased(ArrView3);
 	PrintArrayViewRangeBased(ArrView4);
+	PrintArrayViewRangeBased(ArrView5);
 
 	return;
 }

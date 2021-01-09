@@ -33,6 +33,13 @@ public:
 	{
 	}
 
+	template<typename TInputIterator>
+	FORCEINLINE explicit TArrayView(TInputIterator Begin, TInputIterator End) noexcept
+		: ViewPtr(Begin)
+		, ViewSize(End - Begin)
+	{
+	}
+
 	FORCEINLINE TArrayView(const TArrayView& Other) noexcept
 		: ViewPtr(Other.ViewPtr)
 		, ViewSize(Other.ViewSize)
