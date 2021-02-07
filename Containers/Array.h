@@ -1,11 +1,11 @@
 #pragma once
 #include "Utilities.h"
 #include "Iterator.h"
+#include "Allocator.h"
 
 #include <initializer_list>
-#include <iterator>
 
-template<typename T>
+template<typename T, typename TAllocator = Mallocator>
 class TArray
 {
 public:
@@ -901,4 +901,5 @@ private:
 	T* 		 mPtr;
 	SizeType mSize;
 	SizeType mCapacity;
+	TAllocator mAllocator;
 };
