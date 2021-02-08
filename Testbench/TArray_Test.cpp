@@ -489,6 +489,8 @@ void TArray_Test(Int32 Argc, const Char** Argv)
         PrintArr(Strings3);
 
         {
+            std::cout << "Test Copy Constructor" << std::endl << std::endl;
+
             // Test copy an empty array
             TArray<std::string> Strings4 = Strings0;
             // Test copy an array with data
@@ -500,6 +502,8 @@ void TArray_Test(Int32 Argc, const Char** Argv)
             PrintArr(Strings5);
 
             // Test move an array with data
+            std::cout << "Test Move Constructor" << std::endl << std::endl;
+
             TArray<std::string> Strings6 = Move(Strings5);
 
             std::cout << "After move" << std::endl << std::endl;
@@ -581,7 +585,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
         // Assignment
         std::cout << std::endl << "Testing Assignment" << std::endl << std::endl;
 
-        Strings3.Resize(3, "No I am your father");
+        Strings3.Resize(5, "No i am your father");
 
         std::cout << "Before Assignment" << std::endl << std::endl;
         PrintArr(Strings0);
@@ -613,14 +617,14 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // PushBack
         std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
-            Strings2.PushBack("This is Pushed String #" + std::to_string(I));
+            Strings2.PushBack("This is Pushed String #" + std::to_string(i));
         }
         PrintArr(Strings2);
 
         std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
             Strings2.PushBack(ArgvStr);
         }
@@ -628,15 +632,15 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // EmplaceBack
         std::cout << std::endl << "Testing EmplaceBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
-            Strings2.EmplaceBack("This is an Emplaced String #" + std::to_string(I));
+            Strings2.EmplaceBack("This is an Emplaced String #" + std::to_string(i));
         }
         PrintArr(Strings2);
 
         // PopBack
         std::cout << std::endl << "Testing PopBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 3; I++)
+        for (UInt32 i = 0; i < 3; i++)
         {
             Strings2.PopBack();
         }
@@ -644,6 +648,8 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // Insert
         std::cout << std::endl << "Testing Insert" << std::endl << std::endl;
+
+        std::cout << "Before Insert" << std::endl << std::endl;
         PrintArr(Strings2);
         
         std::cout << "At front" << std::endl << std::endl;
@@ -702,6 +708,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // Erase
         std::cout << std::endl << "Testing Erase" << std::endl << std::endl;
+        std::cout << "Before Erase" << std::endl << std::endl;
         PrintArr(Strings2);
 
         std::cout << "At front" << std::endl << std::endl;
@@ -795,7 +802,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
     // TArray<vec3>
 #if 1
     {
-        std::cout << "Testing TArray<Vec3>" << std::endl;
+        std::cout << std::endl << "Testing TArray<Vec3>" << std::endl;
         std::cout << std::endl << "Testing Constructors" << std::endl;
         // Test constructors
         TArray<Vec3> Vectors0;
@@ -938,7 +945,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // PushBack
         std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
             Vectors2.PushBack(Vec3(7.0, 7.0, 7.0));
         }
@@ -946,7 +953,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         Vec3 Vector(5.0f, -45.0f, 5.0f);
         std::cout << std::endl << "Testing PushBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
             Vectors2.PushBack(Vector);
         }
@@ -954,7 +961,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // EmplaceBack
         std::cout << std::endl << "Testing EmplaceBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 6; I++)
+        for (UInt32 i = 0; i < 6; i++)
         {
             Vectors2.EmplaceBack(1.0, 0.0, 1.0);
         }
@@ -962,7 +969,7 @@ void TArray_Test(Int32 Argc, const Char** Argv)
 
         // PopBack
         std::cout << std::endl << "Testing PopBack" << std::endl << std::endl;
-        for (UInt32 I = 0; I < 3; I++)
+        for (UInt32 i = 0; i < 3; i++)
         {
             Vectors2.PopBack();
         }
