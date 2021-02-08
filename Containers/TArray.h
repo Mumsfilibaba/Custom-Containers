@@ -281,7 +281,7 @@ public:
         , ArraySize(0)
         , ArrayCapacity(0)
     {
-        InternalConstruct(IList.Begin(), IList.End());
+        InternalConstruct(IList.begin(), IList.end());
     }
 
     FORCEINLINE TArray(const TArray& Other) noexcept
@@ -297,7 +297,7 @@ public:
         , ArraySize(0)
         , ArrayCapacity(0)
     {
-        InternalMove(Other);
+        InternalMove(::Forward<TArray>(Other));
     }
 
     FORCEINLINE ~TArray() 
@@ -366,10 +366,9 @@ public:
     {
         if (InSize > ArraySize)
         {
-            if (InSize >= ArrayCapacity)
+            if (InSize > ArrayCapacity)
             {
-                const SizeType NewCapacity = InternalGetResizeFactor(InSize);
-                InternalRealloc(NewCapacity);
+                InternalRealloc(InSize);
             }
 
             InternalDefaultConstructRange(ArrayPtr + ArraySize, ArrayPtr + InSize);
@@ -386,10 +385,9 @@ public:
     {
         if (InSize > ArraySize)
         {
-            if (InSize >= ArrayCapacity)
+            if (InSize > ArrayCapacity)
             {
-                const SizeType NewCapacity = InternalGetResizeFactor(InSize);
-                InternalRealloc(NewCapacity);
+                InternalRealloc(InSize);
             }
 
             InternalCopyEmplace(InSize - ArraySize, Value, ArrayPtr + ArraySize);
@@ -432,7 +430,7 @@ public:
         }
 
         T* DataEnd = ArrayPtr + ArraySize;
-        new(reinterpret_cast<Void*>(DataEnd)) T(Forward<TArgs>(Args)...);
+        new(reinterpret_cast<Void*>(DataEnd)) T(::Forward<TArgs>(Args)...);
         ArraySize++;
         return (*DataEnd);
     }
@@ -451,12 +449,11 @@ public:
     FORCEINLINE Iterator Emplace(ConstIterator Pos, TArgs&&... Args) noexcept
     {
         VALIDATE(InternalIsIteratorOwner(Pos));
-        VALIDATE(Pos < End());
 
-        if (Pos == End()-1)
+        if (Pos == End())
         {
             const SizeType OldSize = ArraySize;
-            EmplaceBack(Forward<TArgs>(Args)...);
+            EmplaceBack(::Forward<TArgs>(Args)...);
             return End() - 1;
         }
 
@@ -477,7 +474,7 @@ public:
             InternalDestruct(DataBegin);
         }
 
-        new (reinterpret_cast<Void*>(DataBegin)) T(Forward<TArgs>(Args)...);
+        new (reinterpret_cast<Void*>(DataBegin)) T(::Forward<TArgs>(Args)...);
         ArraySize++;
         return Iterator(DataBegin);
     }
@@ -510,17 +507,15 @@ public:
     FORCEINLINE Iterator Insert(ConstIterator Pos, std::initializer_list<T> IList) noexcept
     {
         VALIDATE(InternalIsIteratorOwner(Pos));
-        VALIDATE(Pos < End());
 
-        if (Pos == End()-1)
+        if (Pos == End())
         {
-            const SizeType OldSize = ArraySize;
             for (const T& Value : IList)
             {
                 EmplaceBack(::Move(Value));
             }
 
-            return End()-1;
+            return End() - 1;
         }
 
         const SizeType ListSize = static_cast<SizeType>(IList.size());
@@ -562,15 +557,14 @@ public:
     {
         VALIDATE(InternalIsIteratorOwner(Pos));
 
-        if (Pos == End() - 1)
+        if (Pos == End())
         {
-            const SizeType OldSize = ArraySize;
             for (TInputIterator It = InBegin; It != InEnd; It++)
             {
                 EmplaceBack(*It);
             }
 
-            return End()-1;
+            return End() - 1;
         }
 
         const SizeType RangeSize = InternalDistance(InBegin, InEnd);
@@ -624,13 +618,14 @@ public:
             return End();
         }
 
-        T* DataBegin = ArrayPtr + InternalIndex(Pos);
+        const SizeType Index = InternalIndex(Pos);
+        T* DataBegin = ArrayPtr + Index;
         T* DataEnd   = ArrayPtr + ArraySize;
         InternalMemmoveBackwards(DataBegin + 1, DataEnd, DataBegin);
         InternalDestruct(DataEnd - 1);
 
         ArraySize--;
-        return Iterator(DataBegin - 1);
+        return Iterator(DataBegin);
     }
 
     FORCEINLINE Iterator Erase(Iterator InBegin, Iterator InEnd) noexcept
@@ -784,7 +779,7 @@ public:
         if (this != std::addressof(Other))
         {
             Clear();
-            InternalMove(Other);
+            InternalMove(::Forward<TArray>(Other));
         }
 
         return *this;
