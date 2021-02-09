@@ -10,10 +10,10 @@ This repository contains a few template library implementations. It is created m
 * **TFunction** - (Similar to std::function)
 
 **Limitations/Improvements to come:**
-* **TArray** does not support allocators
 * **TSharedPtr** and **TUniquePtr** does not support custom deleters
 
 **Planned:**
 * **String**
 * **THashTable**
 * **TList**
+* **TSet**
