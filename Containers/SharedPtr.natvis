@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="TSharedPtr&lt;*&gt;">
+    <DisplayString>{{ Strong References={Counter->mStrongRefs} Weak References={Counter->mWeakRefs} }}</DisplayString>
+    <Expand>
+      <Item Name="[Strong References]">Counter->mStrongRefs</Item>
+      <Item Name="[Weak References]">Counter->mWeakRefs</Item>
+      <Item Name="[Ptr]">mPtr</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="TWeakPtr&lt;*&gt;">
+    <DisplayString>{{ Strong References={Counter->mStrongRefs} Weak References={Counter->mWeakRefs} }}</DisplayString>
+    <Expand>
+      <Item Name="[Strong References]">Counter->mStrongRefs</Item>
+      <Item Name="[Weak References]">Counter->mWeakRefs</Item>
+      <Item Name="[Ptr]">mPtr</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>

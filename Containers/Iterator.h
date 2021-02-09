@@ -5,7 +5,7 @@ template<typename TIteratorType>
 class TReverseIterator
 {
 public:
-    TReverseIterator() noexcept()
+    TReverseIterator() noexcept
         : mIterator(nullptr)
     {
     }
@@ -28,7 +28,7 @@ public:
 
     ~TReverseIterator() = default;
 
-    TIteratorType* Raw() const { return mItertor; }
+    TIteratorType* Raw() const { return mIterator; }
 
     TIteratorType* operator->() const noexcept { return (mIterator - 1); }
     TIteratorType& operator*() const noexcept { return *(mIterator - 1); }
@@ -84,7 +84,6 @@ public:
     }
 
     Bool operator==(const TReverseIterator& Other) const noexcept { return (mIterator == Other.mIterator); }
-
     Bool operator!=(const TReverseIterator& Other) const noexcept { return (mIterator != Other.mIterator); }
 
     operator TReverseIterator<const TIteratorType>() const noexcept { return TReverseIterator<const TIteratorType>(mIterator); }

@@ -1,8 +1,8 @@
 #include "TArrayView_Test.h"
 
-#include "../Containers/TArray.h"
-#include "../Containers/TStaticArray.h"
-#include "../Containers/TArrayView.h"
+#include "../Containers/Array.h"
+#include "../Containers/StaticArray.h"
+#include "../Containers/ArrayView.h"
 
 #include <iostream>
 
@@ -79,5 +79,5 @@ void TArrayView_Test()
 	PrintArrayViewRangeBased(ArrView4);
 	PrintArrayViewRangeBased(ArrView5);
 
-	return;
+	delete DynamicPtr;
 }

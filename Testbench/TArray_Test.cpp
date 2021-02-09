@@ -1,6 +1,6 @@
 #include "TArray_Test.h"
 
-#include "../Containers/TArray.h"
+#include "../Containers/Array.h"
 
 #include <iostream>
 #include <string>

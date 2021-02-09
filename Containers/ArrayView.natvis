@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="TArray&lt;*&gt;">
-    <DisplayString>{{ Size={mSize} Capacity={mCapacity} }}</DisplayString>
+  <Type Name="TArrayView&lt;*&gt;">
+    <DisplayString>{{ Size={mSize} }}</DisplayString>
     <Expand>
       <Item Name="[Size]">mSize</Item>
-      <Item Name="[Capacity]">mCapacity</Item>
       <ArrayItems>
         <Size>mSize</Size>
-        <ValuePointer>mArray</ValuePointer>
+        <ValuePointer>mView</ValuePointer>
       </ArrayItems>
     </Expand>
   </Type>

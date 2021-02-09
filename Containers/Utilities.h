@@ -8,8 +8,8 @@
  */
 
 #ifndef VALIDATE
-	#include <cassert>
-	#define VALIDATE(Condition)	assert((Condition))
+    #include <cassert>
+    #define VALIDATE(Condition)	assert((Condition))
 #endif
 
 /*
@@ -17,7 +17,7 @@
  */
 
 #ifndef UNREFERENCED_VARIABLE
-	#define UNREFERENCED_VARIABLE(Variable) ((void)(Variable))
+    #define UNREFERENCED_VARIABLE(Variable) ((void)(Variable))
 #endif
 
 /*
@@ -27,14 +27,14 @@
 #ifndef FORCEINLINE
 #ifndef _DEBUG
 #if	defined(_WIN32)
-	#define FORCEINLINE	__forceinline
+    #define FORCEINLINE	__forceinline
 #elif defined(__APPLE__)
-	#define FORCEINLINE	__attribute__((__always_inline__))
+    #define FORCEINLINE	__attribute__((__always_inline__))
 #else
-	#define FORCEINLINE inline
+    #define FORCEINLINE inline
 #endif // Platform
 #else
-	#define FORCEINLINE inline
+    #define FORCEINLINE inline
 #endif // Debug
 #endif // Forceinline
 
@@ -45,19 +45,19 @@
 template<typename T>
 struct _TRemoveReference
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemoveReference<T&>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemoveReference<T&&>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
@@ -70,31 +70,31 @@ using TRemoveReference = typename _TRemoveReference<T>::TType;
 template<typename T>
 struct _TRemovePointer
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemovePointer<T*>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemovePointer<T* const>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemovePointer<T* volatile>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemovePointer<T* const volatile>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
@@ -107,19 +107,19 @@ using TRemovePointer = typename _TRemovePointer<T>::TType;
 template<typename T>
 struct _TRemoveExtent
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
 struct _TRemoveExtent<T[]>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T, size_t SIZE>
 struct _TRemoveExtent<T[SIZE]>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<typename T>
@@ -133,7 +133,7 @@ using TRemoveExtent = typename _TRemoveExtent<T>::TType;
 template<typename T>
 constexpr TRemoveReference<T>&& Move(T&& Arg) noexcept
 {
-	return static_cast<TRemoveReference<T>&&>(Arg);
+    return static_cast<TRemoveReference<T>&&>(Arg);
 }
 
 /*
@@ -144,14 +144,14 @@ constexpr TRemoveReference<T>&& Move(T&& Arg) noexcept
 template<typename T>
 constexpr T&& Forward(TRemoveReference<T>& Arg) noexcept
 {
-	return static_cast<T&&>(Arg);
+    return static_cast<T&&>(Arg);
 }
 
 // Forward an object by converting it into a rvalue from an rvalue
 template<typename T>
 constexpr T&& Forward(TRemoveReference<T>&& Arg) noexcept
 {
-	return static_cast<T&&>(Arg);
+    return static_cast<T&&>(Arg);
 }
 
 /*
@@ -166,7 +166,7 @@ struct _TEnableIf
 template<typename T>
 struct _TEnableIf<true, T>
 {
-	using TType = T;
+    using TType = T;
 };
 
 template<Bool B, typename T = Void>
@@ -179,19 +179,19 @@ using TEnableIf = typename _TEnableIf<B, T>::TType;
 template<typename T>
 struct _TIsArray
 {
-	static constexpr Bool Value = false;
+    static constexpr Bool Value = false;
 };
 
 template<typename T>
 struct _TIsArray<T[]>
 {
-	static constexpr Bool Value = true;
+    static constexpr Bool Value = true;
 };
 
 template<typename T, Int32 N>
 struct _TIsArray<T[N]>
 {
-	static constexpr Bool Value = true;
+    static constexpr Bool Value = true;
 };
 
 template<typename T>

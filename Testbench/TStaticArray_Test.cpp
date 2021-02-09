@@ -1,6 +1,6 @@
 #include "TStaticArray_Test.h"
 
-#include "../Containers/TStaticArray.h"
+#include "../Containers/StaticArray.h"
 
 #include <iostream>
 #include <array>
@@ -12,7 +12,7 @@ void TStaticArray_Test()
 	constexpr UInt32 Num = 16;
 	TStaticArray<Int32, Num> Numbers;
 	const TStaticArray<Int32, Num>& ConstNumbers = Numbers;
-	
+
 	std::cout << "Testing At()" << std::endl;
 	for (UInt32 i = 0; i < Num; i++)
 	{

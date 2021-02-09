@@ -1,6 +1,6 @@
 #include "TFunction_Test.h"
 
-#include "../Containers/TFunction.h"
+#include "../Containers/Function.h"
 
 #include <iostream>
 

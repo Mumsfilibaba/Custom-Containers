@@ -1,6 +1,6 @@
 #include "TSharedPtr_Test.h"
 
-#include "../Containers/TSharedPtr.h"
+#include "../Containers/SharedPtr.h"
 
 #include <iostream>
 
