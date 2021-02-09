@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="TStaticArray&lt;*&gt;">
-    <DisplayString>{{ Size={_EEN_SIZE} }}</DisplayString>
+    <DisplayString>{{ Size={$T2} }}</DisplayString>
     <Expand>
-      <Item Name="[Size]">_EEN_SIZE</Item>
+      <Item Name="[Size]">$T2</Item>
       <ArrayItems>
-        <Size>_EEN_SIZE</Size>
+        <Size>$T2</Size>
         <ValuePointer>Elements</ValuePointer>
       </ArrayItems>
     </Expand>
