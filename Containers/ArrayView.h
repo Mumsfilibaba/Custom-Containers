@@ -1,5 +1,6 @@
 #pragma once
 #include "Utilities.h"
+#include "Iterator.h"
 
 // TArrayView - View of an array similar to std::span
 
