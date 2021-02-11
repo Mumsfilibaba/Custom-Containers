@@ -55,6 +55,8 @@ public:
         Other.mSize = 0;
     }
 
+    Bool IsEmpty() const noexcept { return (mSize == 0); }
+
     T& Front() noexcept { return mView[0]; }
     const T& Front() const noexcept { return mView[0]; }
 
