@@ -80,6 +80,12 @@ public:
         Other = ::Move(TempView);
     }
     
+    Iterator Begin() noexcept { return Iterator(mArray); }
+    Iterator End() noexcept { return Iterator(mArray + mSize); }
+
+    ConstIterator Begin() const noexcept { return Iterator(mArray); }
+    ConstIterator End() const noexcept { return Iterator(mArray + mSize); }
+
     SizeType LastIndex() const noexcept { return mSize > 0 ? mSize - 1 : 0; }
     SizeType Size() const noexcept { return mSize; }
     SizeType SizeInBytes() const noexcept { return mSize * sizeof(T); }
