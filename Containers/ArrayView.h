@@ -51,7 +51,7 @@ public:
         : mView(Other.mView)
         , mSize(Other.mSize)
     {
-        Other.mView  = nullptr;
+        Other.mView = nullptr;
         Other.mSize = 0;
     }
 
@@ -80,11 +80,11 @@ public:
         Other = ::Move(TempView);
     }
     
-    Iterator Begin() noexcept { return Iterator(mArray); }
-    Iterator End() noexcept { return Iterator(mArray + mSize); }
+    Iterator Begin() noexcept { return Iterator(mView); }
+    Iterator End() noexcept { return Iterator(mView + mSize); }
 
-    ConstIterator Begin() const noexcept { return Iterator(mArray); }
-    ConstIterator End() const noexcept { return Iterator(mArray + mSize); }
+    ConstIterator Begin() const noexcept { return Iterator(mView); }
+    ConstIterator End() const noexcept { return Iterator(mView + mSize); }
 
     SizeType LastIndex() const noexcept { return mSize > 0 ? mSize - 1 : 0; }
     SizeType Size() const noexcept { return mSize; }
@@ -98,7 +98,7 @@ public:
 
     TArrayView& operator=(const TArrayView& Other) noexcept
     {
-        mView  = Other.mView;
+        mView = Other.mView;
         mSize = Other.mSize;
         return *this;
     }
@@ -107,10 +107,10 @@ public:
     {
         if (this != &Other)
         {
-            mView  = Other.mView;
+            mView = Other.mView;
             mSize = Other.mSize;
-            Other.mView  = nullptr;
-            Other.mSize= 0;
+            Other.mView = nullptr;
+            Other.mSize = 0;
         }
 
         return *this;
